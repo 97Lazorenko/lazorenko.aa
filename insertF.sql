@@ -432,17 +432,19 @@ insert into LAZORENKO_AL.ages(age_id, age_group_id)
 values (100, 4);
 
 insert into LAZORENKO_AL.specialisation(spec_id, name, enter_into_the_sys, delete_from_the_sys)
-values (default, 'педиатр', '30/01/2021', null);
+values (default, 'педиатр', '30/01/2015', null);
 insert into LAZORENKO_AL.specialisation(spec_id, name, enter_into_the_sys, delete_from_the_sys)
-values (default, 'лор', '30/01/2021', null);
+values (default, 'лор', '30/01/2015', null);
 insert into LAZORENKO_AL.specialisation(spec_id, name, enter_into_the_sys, delete_from_the_sys)
-values (default, 'аллерголог', '30/01/2021', null);
+values (default, 'аллерголог', '30/01/2015', null);
 insert into LAZORENKO_AL.specialisation(spec_id, name, enter_into_the_sys, delete_from_the_sys)
-values (default, 'травматолог', '30/01/2021', null);
+values (default, 'травматолог', '30/01/2015', null);
 insert into LAZORENKO_AL.specialisation(spec_id, name, enter_into_the_sys, delete_from_the_sys)
-values (default, 'уролог', '30/01/2021', null);
+values (default, 'уролог', '30/01/2015', null);
 insert into LAZORENKO_AL.specialisation(spec_id, name, enter_into_the_sys, delete_from_the_sys)
-values (default, 'гениколог', '30/01/2021', null);
+values (default, 'гениколог', '30/01/2015', null);
+insert into LAZORENKO_AL.specialisation(spec_id, name, enter_into_the_sys, delete_from_the_sys)
+values (default, 'терапевт', '30/01/2015', '26/10/2021');
 
 insert into LAZORENKO_AL.doctor_spec(doctor_spec_id, doctor_id, spec_id)
 values (default, 3, 2);
@@ -505,7 +507,7 @@ values (default, 29, 1);
 insert into LAZORENKO_AL.doctor_spec(doctor_spec_id, doctor_id, spec_id)
 values (default, 30, 2);
 insert into LAZORENKO_AL.doctor_spec(doctor_spec_id, doctor_id, spec_id)
-values (default, 31, 5);
+values (default, 31, 7);
 insert into LAZORENKO_AL.doctor_spec(doctor_spec_id, doctor_id, spec_id)
 values (default, 32, 5);
 insert into LAZORENKO_AL.doctor_spec(doctor_spec_id, doctor_id, spec_id)
@@ -617,6 +619,8 @@ insert into LAZORENKO_AL.ticket(ticket_id, doctor_id, ticket_stat_id, appointmen
 values (default, 4, 1, '16/10/2021 14:00:00', '16/10/2021 14:30:00');
 insert into LAZORENKO_AL.ticket(ticket_id, doctor_id, ticket_stat_id, appointment_beg, appointment_end)
 values (default, 4, 1, '20/10/2021 14:00:00', '20/10/2021 14:30:00');
+insert into LAZORENKO_AL.ticket(ticket_id, doctor_id, ticket_stat_id, appointment_beg, appointment_end)
+values (default, 3, 1, '13/10/2021 11:30:00', '13/10/2021 12:00:00');
 
 insert into LAZORENKO_AL.account(account_id, name)
 values (default, 'user1');
