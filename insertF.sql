@@ -621,6 +621,10 @@ insert into LAZORENKO_AL.ticket(ticket_id, doctor_id, ticket_stat_id, appointmen
 values (default, 4, 1, '20/10/2021 14:00:00', '20/10/2021 14:30:00');
 insert into LAZORENKO_AL.ticket(ticket_id, doctor_id, ticket_stat_id, appointment_beg, appointment_end)
 values (default, 3, 1, '13/10/2021 11:30:00', '13/10/2021 12:00:00');
+insert into LAZORENKO_AL.ticket(ticket_id, doctor_id, ticket_stat_id, appointment_beg, appointment_end)
+values (default, 3, 1, '20/11/2021 11:30:00', '13/10/2021 12:00:00');
+insert into LAZORENKO_AL.ticket(ticket_id, doctor_id, ticket_stat_id, appointment_beg, appointment_end)
+values (default, 3, 1, '23/11/2021 11:30:00', '13/10/2021 12:00:00');
 
 insert into LAZORENKO_AL.account(account_id, name)
 values (default, 'user1');
