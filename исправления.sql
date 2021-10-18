@@ -17,159 +17,159 @@ create table LAZORENKO_AL.work_time (
 );
 
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '9:00', '18:00', 4);
+values('понедельник', '9:00', '18:00', 4);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '9:00', '18:00', 4);
+values('вторник', '9:00', '18:00', 4);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '9:00', '18:00', 4);
+values('среда', '9:00', '18:00', 4);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '9:00', '18:00', 4);
+values('четверг', '9:00', '18:00', 4);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '9:00', '18:00', 4);
+values('пятница', '9:00', '18:00', 4);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '10:00', '17:00', 4);
+values('суббота', '10:00', '17:00', 4);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', '10:00', '16:00', 4);
+values('воскресенье', '10:00', '16:00', 4);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '9:00', '18:00', 5);
+values('понедельник', '9:00', '18:00', 5);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '9:00', '18:00', 5);
+values('вторник', '9:00', '18:00', 5);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '9:00', '18:00', 5);
+values('среда', '9:00', '18:00', 5);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '9:00', '18:00', 5);
+values('четверг', '9:00', '18:00', 5);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '9:00', '18:00', 5);
+values('пятница', '9:00', '18:00', 5);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', null, null, 5);
+values('суббота', null, null, 5);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', null, null, 5);
+values('воскресенье', null, null, 5);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '8:00', '18:00', 6);
+values('понедельник', '8:00', '18:00', 6);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '8:00', '18:00', 6);
+values('вторник', '8:00', '18:00', 6);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '8:00', '18:00', 6);
+values('среда', '8:00', '18:00', 6);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '8:00', '18:00', 6);
+values('четверг', '8:00', '18:00', 6);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '8:00', '18:00', 6);
+values('пятница', '8:00', '18:00', 6);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '9:00', '16:00', 6);
+values('суббота', '9:00', '16:00', 6);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', null, null, 6);
+values('воскресенье', null, null, 6);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '9:00', '18:00', 7);
+values('понедельник', '9:00', '18:00', 7);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '9:00', '18:00', 7);
+values('вторник', '9:00', '18:00', 7);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '9:00', '18:00', 7);
+values('среда', '9:00', '18:00', 7);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '9:00', '18:00', 7);
+values('четверг', '9:00', '18:00', 7);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '9:00', '18:00', 7);
+values('пятница', '9:00', '18:00', 7);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '10:00', '17:00', 7);
+values('суббота', '10:00', '17:00', 7);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', '10:00', '16:00', 7);
+values('воскресенье', '10:00', '16:00', 7);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '9:00', '18:00', 8);
+values('понедельник', '9:00', '18:00', 8);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '9:00', '18:00', 8);
+values('вторник', '9:00', '18:00', 8);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '9:00', '18:00', 8);
+values('среда', '9:00', '18:00', 8);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '9:00', '18:00', 8);
+values('четверг', '9:00', '18:00', 8);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '9:00', '18:00', 8);
+values('пятница', '9:00', '18:00', 8);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', null, null, 8);
+values('суббота', null, null, 8);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', null, null, 8);
+values('воскресенье', null, null, 8);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '9:00', '18:00', 9);
+values('понедельник', '9:00', '18:00', 9);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '9:00', '18:00', 9);
+values('вторник', '9:00', '18:00', 9);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '9:00', '18:00', 9);
+values('среда', '9:00', '18:00', 9);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '9:00', '18:00', 9);
+values('четверг', '9:00', '18:00', 9);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '9:00', '18:00', 9);
+values('пятница', '9:00', '18:00', 9);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '10:00', '17:00', 9);
+values('суббота', '10:00', '17:00', 9);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', '10:00', '16:00', 9);
+values('воскресенье', '10:00', '16:00', 9);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '8:00', '17:00', 10);
+values('понедельник', '8:00', '17:00', 10);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '8:00', '17:00', 10);
+values('вторник', '8:00', '17:00', 10);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '8:00', '17:00', 10);
+values('среда', '8:00', '17:00', 10);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '8:00', '17:00', 10);
+values('четверг', '8:00', '17:00', 10);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '8:00', '17:00', 10);
+values('пятница', '8:00', '17:00', 10);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '9:00', '16:00', 10);
+values('суббота', '9:00', '16:00', 10);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', '10:00', '15:00', 10);
+values('воскресенье', '10:00', '15:00', 10);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '9:00', '20:00', 11);
+values('понедельник', '9:00', '20:00', 11);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '9:00', '20:00', 11);
+values('вторник', '9:00', '20:00', 11);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '9:00', '20:00', 11);
+values('среда', '9:00', '20:00', 11);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '9:00', '20:00', 11);
+values('четверг', '9:00', '20:00', 11);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '9:00', '20:00', 11);
+values('пятница', '9:00', '20:00', 11);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '10:00', '17:00', 11);
+values('суббота', '10:00', '17:00', 11);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', '10:00', '15:00', 11);
+values('воскресенье', '10:00', '15:00', 11);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '7:00', '18:00', 12);
+values('понедельник', '7:00', '18:00', 12);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '7:00', '18:00', 12);
+values('вторник', '7:00', '18:00', 12);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '7:00', '18:00', 12);
+values('среда', '7:00', '18:00', 12);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '7:00', '18:00', 12);
+values('четверг', '7:00', '18:00', 12);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '7:00', '18:00', 12);
+values('пятница', '7:00', '18:00', 12);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '10:00', '17:00', 12);
+values('суббота', '10:00', '17:00', 12);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', null, null, 12);
+values('воскресенье', null, null, 12);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '9:00', '18:00', 13);
+values('понедельник', '9:00', '18:00', 13);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '9:00', '18:00', 13);
+values('вторник', '9:00', '18:00', 13);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '9:00', '18:00', 13);
+values('среда', '9:00', '18:00', 13);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '9:00', '18:00', 13);
+values('четверг', '9:00', '18:00', 13);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '9:00', '18:00', 13);
+values('пятница', '9:00', '18:00', 13);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '10:00', '17:00', 13);
+values('суббота', '10:00', '17:00', 13);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', '10:00', '16:00', 13);
+values('воскресенье', '10:00', '16:00', 13);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Monday', '9:00', '20:00', 14);
+values('понедельник', '9:00', '20:00', 14);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Tuesday', '9:00', '20:00', 14);
+values('вторник', '9:00', '20:00', 14);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Wednesday', '9:00', '20:00', 14);
+values('среда', '9:00', '20:00', 14);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Thursday', '9:00', '20:00', 14);
+values('четверг', '9:00', '20:00', 14);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Friday', '9:00', '20:00', 14);
+values('пятница', '9:00', '20:00', 14);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Saturday', '10:00', '17:00', 14);
+values('суббота', '10:00', '17:00', 14);
 insert into LAZORENKO_AL.work_time(day, begin_time, end_time, hospital_id)
-values('Sunday', '10:00', '15:00', 14);
+values('воскресенье', '10:00', '15:00', 14);
 
 drop table LAZORENKO_AL.ages;
 
