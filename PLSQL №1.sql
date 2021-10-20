@@ -24,35 +24,44 @@ dbms_output.put_line(v_region_name);
 declare
     v_availability number;
     v_delete_from_the_sys date;
-    v_hospital_id number;
+    v_hospital_name varchar2(50);
     begin
     v_availability :=2;
     v_delete_from_the_sys :='26-10-2020';
-    select h.hospital_id
-    into v_hospital_id
+    select h.name
+    into v_hospital_name
     from lazorenko_al.hospital h
     where h.availability_id=v_availability and h.delete_from_the_sys=v_delete_from_the_sys;
-    dbms_output.put_line(v_hospital_id);
+    dbms_output.put_line(v_hospital_name);
 end;
 
 --Заведите булеву переменную. создайте запрос который имеет разный результат в зависимости от бул переменной.
 -- всеми известными способами
+
 declare
-              v_is_patient_zone boolean;
-              begin
-              case
-                  when lazorenko_al.patient.zone_id=1
-                  then v_is_patient_zone :=true;
-                  when lazorenko_al.patient.zone_id=2
-                  then v_is_patient_zone :=false;
-                  else v_is_patient_zone :=null;
-              end case;
-              begin
-              v_is_patient_zone :=true;
-              select p.zone_id
-              from lazorenko_al.patient p;
-              dbms_output.put_line(v_is_patient_zone);
-              exit;
+v_salary_is_more_than_avg boolean;
+v_doctor_id number;
+v_result_salary number;
+v_avg_salary number;
+begin
+    v_salary_is_more_than_avg :=true;
+CASE
+    when v_salary_is_more_than_avg=true
+    then v_doctor_id :=11;
+    when v_salary_is_more_than_avg=false
+    then v_doctor_id :=3;
+    else v_doctor_id :=1;
+end CASE;
+    select di.salary
+    into v_result_salary
+    from lazorenko_al.doctors_info di
+    where di.doctor_id=v_doctor_id;
+select round(avg(salary), 1) as avg_salary
+into v_avg_salary
+from lazorenko_al.doctors_info;
+    dbms_output.put_line('зарплата конкретного врача, равная' || ' ' || v_result_salary ||', '|| 'больше средней зарплаты, равной' || ' ' || v_avg_salary);
+    END;
+
 
 -- Заведите заранее переменные даты. создайте выборку между датами, за сегодня. в день за неделю назад.
 -- Сделайте тоже самое но через преобразрование даты из строки
@@ -143,15 +152,63 @@ end;
 
 --Завести заранее переменную массива строк. сделать выборку на массив строк. записать в переменную.
 -- вывести каждую строку в цикле в консоль
+
+/*
 declare
-type arr_type is table of lazorenko_al.patient%rowtype
+type arr_type is table of number
 index by binary_integer;
-arr_something arr_type;
-arr_patient_id number;
+arr arr_type;
+a binary_integer;
 begin
-select *
-into arr_patient_id, arr_something.last_name, arr_something.first_name,
-     arr_something.petronymic, arr_something.born_date, arr_something.tel_number,
-     arr_something.sex_id, arr_something.zone_id
-from lazorenko_al.patient p;
+arr(1) := 1;
+arr(2) := 2;
+arr(3) := 3;
+ a := arr.first;
+  loop
+    dbms_output.put_line(arr(a));
+  exit when a = arr.last;
+   a := arr.next(a);
+  end loop;
 end;
+ */
+
+
+declare
+type arr_type is table of lazorenko_al.hospital%rowtype
+index by binary_integer;
+a_index binary_integer :=1;
+a_hospital arr_type;
+begin
+select hospital_id, name, availability_id, med_org_id,
+       ownership_type_id, enter_into_the_sys, delete_from_the_sys
+bulk collect into a_hospital.hospital_id, a_hospital.name, a_hospital.availability_id, a_hospital.med_org_id, a_hospital.ownership_type_id, a_hospital.enter_into_the_sys, a_hospital.delete_from_the_sys
+from lazorenko_al.hospital h;
+a_index :=a_hospital.first;
+loop
+    exit when a_index = a_hospital.last;
+    dbms_output.put_line(a_hospital.hospital_id || a_hospital.name || a_hospital.availability_id || a_hospital.med_org_id || a_hospital.ownership_type_id || a_hospital.enter_into_the_sys || a_hospital.delete_from_the_sys);
+    a_index := a_hospital.next(a_index);
+end loop;
+end;
+
+declare
+type arr_type is table of lazorenko_al.hospital%rowtype
+index by binary_integer;
+a_index binary_integer :=1;
+a_hospital arr_type;
+begin
+select hospital_id, name, availability_id, med_org_id,
+       ownership_type_id, enter_into_the_sys, delete_from_the_sys
+bulk collect into a_hospital
+from lazorenko_al.hospital h;
+a_index :=a_hospital.first;
+loop
+    exit when a_index = a_hospital.last;
+    dbms_output.put_line(a_hospital);
+    a_index := a_hospital.next(a_index);
+end loop;
+end;
+
+
+
+
