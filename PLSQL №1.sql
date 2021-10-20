@@ -153,7 +153,6 @@ end;
 --Завести заранее переменную массива строк. сделать выборку на массив строк. записать в переменную.
 -- вывести каждую строку в цикле в консоль
 
-/*
 declare
 type arr_type is table of number
 index by binary_integer;
@@ -170,45 +169,29 @@ arr(3) := 3;
    a := arr.next(a);
   end loop;
 end;
- */
-
 
 declare
-type arr_type is table of lazorenko_al.hospital%rowtype
+type arr_type is table of varchar2(2000)
 index by binary_integer;
 a_index binary_integer :=1;
-a_hospital arr_type;
+a1_index binary_integer :=1;
+a2_index binary_integer :=1;
+a_doctor arr_type;
+a_doctor1 arr_type;
+a_doctor2 arr_type;
 begin
-select hospital_id, name, availability_id, med_org_id,
-       ownership_type_id, enter_into_the_sys, delete_from_the_sys
-bulk collect into a_hospital.hospital_id, a_hospital.name, a_hospital.availability_id, a_hospital.med_org_id, a_hospital.ownership_type_id, a_hospital.enter_into_the_sys, a_hospital.delete_from_the_sys
-from lazorenko_al.hospital h;
-a_index :=a_hospital.first;
+select d.doctor_id, d.name, d.hiring_date
+bulk collect into a_doctor, a_doctor1, a_doctor2
+from lazorenko_al.doctor d;
+a_index :=a_doctor.first;
+a1_index :=a_doctor.first;
+a2_index :=a_doctor.first;
 loop
-    exit when a_index = a_hospital.last;
-    dbms_output.put_line(a_hospital.hospital_id || a_hospital.name || a_hospital.availability_id || a_hospital.med_org_id || a_hospital.ownership_type_id || a_hospital.enter_into_the_sys || a_hospital.delete_from_the_sys);
-    a_index := a_hospital.next(a_index);
-end loop;
+    exit when a_index = a_doctor.last and a1_index = a_doctor1.last and a2_index = a_doctor2.last;
+    dbms_output.put_line('id доктора=' || a_doctor(a_index) || ' ' ||'Фамилия='
+                             || a_doctor1(a1_index) || ' '||'дата найма='|| a_doctor2(a2_index));
+    a_index := a_doctor.next(a_index);
+    a1_index := a_doctor1.next(a1_index);
+    a2_index := a_doctor2.next(a2_index);
+    end loop;
 end;
-
-declare
-type arr_type is table of lazorenko_al.hospital%rowtype
-index by binary_integer;
-a_index binary_integer :=1;
-a_hospital arr_type;
-begin
-select hospital_id, name, availability_id, med_org_id,
-       ownership_type_id, enter_into_the_sys, delete_from_the_sys
-bulk collect into a_hospital
-from lazorenko_al.hospital h;
-a_index :=a_hospital.first;
-loop
-    exit when a_index = a_hospital.last;
-    dbms_output.put_line(a_hospital);
-    a_index := a_hospital.next(a_index);
-end loop;
-end;
-
-
-
-
