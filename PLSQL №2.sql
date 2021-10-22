@@ -1,17 +1,4 @@
 
-select h.name, a.name, count(doctor_id) as количество_врачей, o.name, w.end_time,
- case
-    when w.end_time>TO_CHAR(sysdate, 'hh24:mi:00') then 1
-    else 0
-end as сейчас_открыто
-from hospital h inner join available a using(availability_id)
-    inner join ownership_type o using(ownership_type_id) inner join work_time w using(hospital_id)
-    inner join doctor using(hospital_id) inner join doctor_spec using(doctor_id)
-    inner join specialisation using(spec_id)
-where 2=spec_id and h.delete_from_the_sys is null and w.day in (select to_char(sysdate,'day') from dual)
-group by h.name, a.name, o.name, w.end_time
-order by o.name desc, количество_врачей desc, сейчас_открыто desc;
-
 --query1
 
 DECLARE
@@ -55,16 +42,16 @@ end;
 DECLARE
     CURSOR c_get_info
     IS
-    select h.name, a.name, count(doctor_id) as количество_врачей, o.name, w.end_time,
+select h.name, a.name, count(doctor_id) as количество_врачей, o.name, w.end_time,
  case
     when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
     else 0
 end as сейчас_открыто
-from hospital h inner join available a using(availability_id)
-    inner join ownership_type o using(ownership_type_id) inner join work_time w using(hospital_id)
+from hospital h left join work_time w using(hospital_id)
+    inner join ownership_type o using(ownership_type_id)
     inner join doctor using(hospital_id) inner join doctor_spec using(doctor_id)
-    inner join specialisation using(spec_id)
-where 2=spec_id and h.delete_from_the_sys is null and w.day in (select to_char(sysdate,'day') from dual)
+    inner join available a using(availability_id)
+where 2=spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd')
 group by h.name, a.name, o.name, w.end_time
 order by o.name desc, количество_врачей desc, сейчас_открыто desc;
     v_text LAZORENKO_AL.hospital.name%TYPE;
@@ -73,11 +60,10 @@ order by o.name desc, количество_врачей desc, сейчас_от�
     v3_text LAZORENKO_AL.ownership_type.name%TYPE;
     v4_text varchar2(200);
     v5_text number;
-
 BEGIN
     OPEN c_get_info;
     loop
-    FETCH c_get_info INTO v_text, v1_text, v2_text, v3_text, v4_text, v4_text;
+    FETCH c_get_info INTO v_text, v1_text, v2_text, v3_text, v4_text, v5_text;
     exit when c_get_info%notfound;
     DBMS_OUTPUT.PUT_LINE(v_text || ' '|| v1_text||' ' || v2_text ||' '|| v3_text || ' ' || v4_text || ' ' || v5_text);
     end loop;
@@ -98,7 +84,7 @@ from doctor d inner join doctor_spec using(doctor_id)
     inner join doctors_info di using(doctor_id)
     inner join hospital using(hospital_id)
 where 5 = hospital_id and d.dismiss_date is null
-order by участок_пациента desc, di.qualification desc;
+order by di.qualification desc, участок_пациента desc;
     v_text LAZORENKO_AL.doctor.name%TYPE;
     v_text1 LAZORENKO_AL.specialisation.name%TYPE;
     v_text2 LAZORENKO_AL.doctors_info.qualification%type;

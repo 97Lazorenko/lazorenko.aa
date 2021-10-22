@@ -8,7 +8,7 @@ from doctor d inner join doctor_spec using(doctor_id)
     inner join doctors_info di using(doctor_id)
     inner join hospital using(hospital_id)
 where 5 = hospital_id and d.dismiss_date is null
-order by участок_пациента desc, di.qualification desc;
+order by di.qualification desc, участок_пациента desc;
 
 
 

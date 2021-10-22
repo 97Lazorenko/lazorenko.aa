@@ -118,3 +118,13 @@ insert into LAZORENKO_AL.doctors_info(education, qualification, salary, rating, 
 values ('университет3', 5, 35000, 6, null, 45);
 insert into LAZORENKO_AL.doctors_info(education, qualification, salary, rating, reviews, doctor_id)
 values ('университет3', 15, 50000, 5, null, 46);
+
+insert into LAZORENKO_AL.hospital(name, availability_id, med_org_id, ownership_type_id, enter_into_the_sys, delete_from_the_sys)
+values ('тест', 1, 1, 1, default, null);
+
+insert into LAZORENKO_AL.doctor(doctor_id, name, hospital_id, zone_id, hiring_date, dismiss_date)
+values (default, 'тест', 16, 2, '2018/03/12', null);
+
+insert into LAZORENKO_AL.doctor_spec(doctor_spec_id, doctor_id, spec_id)
+values (default, 47, 2);
+
