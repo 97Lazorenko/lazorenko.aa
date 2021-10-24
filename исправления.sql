@@ -183,3 +183,47 @@ update LAZORENKO_AL.age_groups set age_groups.min_age=18, age_groups.max_age=59
 WHERE age_groups.age_group_id=3;
 update LAZORENKO_AL.age_groups set age_groups.min_age=60, age_groups.max_age=100
 WHERE age_groups.age_group_id=4;
+
+drop table lazorenko_al.patient_docs;
+
+create table documents (
+    document_id number generated always as identity (
+        start with 1 maxvalue 999999999999 minvalue 1 nocycle nocache noorder) primary key,
+        name varchar2(50)
+);
+
+insert into lazorenko_al.documents (document_id, name)
+values (default, 'паспорт');
+insert into lazorenko_al.documents (document_id, name)
+values (default, 'СНИЛС');
+insert into lazorenko_al.documents (document_id, name)
+values (default, 'ИНН');
+insert into lazorenko_al.documents (document_id, name)
+values (default, 'Страховой полис');
+
+create table documents_numbers (
+    doc_num_id number generated always as identity (
+    start with 1 maxvalue 999999999999 minvalue 1 nocycle nocache noorder) primary key,
+    patient_id number references lazorenko_al.patient(patient_id) not null,
+    document_id number references lazorenko_al.documents(document_id) null,
+    value varchar2(50) null
+);
+
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 1, 1, '3432 657483');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 1, 2, '768985875');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 1, 4, '9999888877776666');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 2, 1, '3488 990483');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 2, 2, '999999888');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 2, 3, '758595640987');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 3, 1, '3290 758595');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 3, 3, '475898470987');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 3, 4, '4444777766668888');

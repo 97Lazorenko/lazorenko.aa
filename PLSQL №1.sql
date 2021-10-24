@@ -140,8 +140,7 @@ declare
 v_patient LAZORENKO_AL.patient%rowtype;
 begin
     select *
-    into v_patient.patient_id, v_patient.last_name, v_patient.first_name,
-        v_patient.petronymic, v_patient.born_date, v_patient.tel_number, v_patient.sex_id, v_patient.zone_id
+    into v_patient
     from patient p
     where p.patient_id=1;
 dbms_output.put_line(v_patient.patient_id || ' ' || v_patient.last_name || ' ' || v_patient.first_name
