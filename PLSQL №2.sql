@@ -645,14 +645,193 @@ end;
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
----------------------------------------- КУРСОРНАЯ ПЕРЕМЕННАЯ
+---------------------------------------- НЕЯВНЫЕ КУРСОРЫ
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
+declare
+type record1 is record (hospital_id number, name varchar2(100));
+    v_record record1;
+begin
+    for i in (
+        select h.hospital_id, h.name
+        from lazorenko_al.hospital h
+    )
+    loop
+    declare
+v_record record1:=i;
+    begin
+        dbms_output.put_line(i.hospital_id||', '||i.name);
+    end;
+    end loop;
+    end;
+--query1
+declare
+v_region_id number :=1;
+begin
+    for i in
+        (select c.name as cn, r.name as rn
+from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
+    where v_region_id=region_id)
+    loop
+    begin
+        dbms_output.put_line(i.cn||', '||i.rn);
+    end;
+    end loop;
+    end;
+
+--query2
+declare
+v_hospital_id number :=6;
+begin
+    for i in
+        (select distinct s.name
+from specialisation s inner join doctor_spec using(spec_id)
+    inner join doctor d using(doctor_id)
+    inner join hospital h using(hospital_id)
+where s.delete_from_the_sys is null and d.dismiss_date is null
+and h.delete_from_the_sys is null and v_hospital_id=hospital_id)
+    loop
+    begin
+        dbms_output.put_line(i.name);
+    end;
+    end loop;
+    end;
 
 
+--query3
+declare
+v_spec_id number :=2;
+begin
+    for i in
+        (select h.name as hname, a.name as aname, count(doctor_id) as количество_врачей, o.name as oname,
+case
+    when w.end_time is null then ' - '
+    else w.end_time
+end as закрытие
+from hospital h left join work_time w using(hospital_id)
+    inner join ownership_type o using(ownership_type_id)
+    inner join doctor using(hospital_id) inner join doctor_spec using(doctor_id)
+    inner join available a using(availability_id)
+where spec_id=v_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd')
+group by h.name, a.name, o.name, w.end_time
+order by o.name desc, количество_врачей desc, case
+    when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
+    else 0
+end desc)
+    loop
+    begin
+        dbms_output.put_line(i.hname||', '||i.aname||', '||i.количество_врачей||', '||i.oname||', '||i.закрытие);
+    end;
+    end loop;
+    end;
 
 
+--query4
+declare
+v_hospital_id number :=5;
+v_zone_id number :=2;
+begin
+    for i in
+        (select d.name as dname, s.name as sname, di.qualification as qual
+from doctor d inner join doctor_spec using(doctor_id)
+    inner join specialisation s using(spec_id)
+    inner join doctors_info di using(doctor_id)
+    inner join hospital using(hospital_id)
+where hospital_id=v_hospital_id and d.dismiss_date is null
+order by di.qualification desc,
+     case when zone_id=v_zone_id then 1
+     else 0 end desc)
+    loop
+    begin
+        dbms_output.put_line(i.dname||', '||i.sname||', '||i.qual);
+    end;
+    end loop;
+    end;
 
+--query5
+declare
+v_doctor_id number :=3;
+begin
+    for i in
+        (select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
+    from ticket t right join doctor d using(doctor_id)
+    where doctor_id=v_doctor_id
+    and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
+    order by t.appointment_beg)
+    loop
+    begin
+        dbms_output.put_line(i.ticket_id||', '||i.name||', '||i.appointment_beg||', '||i.appointment_end);
+    end;
+    end loop;
+    end;
 
+--query6
+declare
+v_document_id number :=3;
+begin
+    for i in
+        (select p.last_name, p.first_name, p.petronymic, d.name,
+    case
+    when dn.value is null then 'не указано'
+    else dn.value
+end as документ
+from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(patient_id)
+    right join lazorenko_al.documents d using(document_id)
+    where document_id=v_document_id)
+    loop
+    begin
+        dbms_output.put_line(i.last_name||', '||i.first_name||', '||i.petronymic||', '||i.name||', '||i.документ);
+    end;
+    end loop;
+    end;
 
+--query7
+declare
+v_hospital_id number :=6;
+begin
+    for i in
+        (select
+case
+    when w.day=1 then 'понедельник'
+    when w.day=2 then 'вторник    '
+    when w.day=3 then 'среда      '
+    when w.day=4 then 'четверг    '
+    when w.day=5 then 'пятница    '
+    when w.day=6 then 'суббота    '
+    when w.day=7 then 'воскресенье'
+end as день_недели,
+case
+    when w.begin_time is null then 'не указано'
+    else w.begin_time
+end as время_открытия,
+case
+    when w.end_time is null then 'не указано'
+    else w.end_time
+end as время_закрытия
+from hospital h left join work_time w using(hospital_id) inner join available a using(availability_id)
+where hospital_id=v_hospital_id and h.delete_from_the_sys is null
+order by w.day)
+    loop
+    begin
+        dbms_output.put_line(i.день_недели||', '||i.время_открытия||', '||i.время_закрытия);
+    end;
+    end loop;
+    end;
 
+--query8
+declare
+v_patient_id number :=1;
+v_record_stat_id number :=1;
+begin
+    for i in
+        (select last_name, first_name, petronymic, d.name as d_name, record_status.name as r_name, appointment_beg, appointment_end
+from lazorenko_al.patient p left join lazorenko_al.records using(patient_id) inner join record_status using(record_stat_id)
+    inner join ticket using(ticket_id) inner join lazorenko_al.doctor d using(doctor_id)
+    where patient_id=v_patient_id and record_stat_id=v_record_stat_id)
+    loop
+    begin
+        dbms_output.put_line(i.last_name||', '||i.first_name||', '||i.petronymic||', '||i.d_name||', '||i.r_name
+                                 ||', '||i.appointment_beg||', '||i.appointment_end);
+    end;
+    end loop;
+    end;
