@@ -214,6 +214,8 @@ values (default, 1, 1, '3432 657483');
 insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
 values (default, 1, 2, '768985875');
 insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 1, 3, null);
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
 values (default, 1, 4, '9999888877776666');
 insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
 values (default, 2, 1, '3488 990483');
@@ -222,8 +224,43 @@ values (default, 2, 2, '999999888');
 insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
 values (default, 2, 3, '758595640987');
 insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 2, 4, null);
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
 values (default, 3, 1, '3290 758595');
+insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
+values (default, 3, 2, null);
 insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
 values (default, 3, 3, '475898470987');
 insert into lazorenko_al.documents_numbers (doc_num_id, patient_id, document_id, value)
 values (default, 3, 4, '4444777766668888');
+
+update LAZORENKO_AL.records set record_stat_id = 3
+WHERE records.record_id=1;
+update LAZORENKO_AL.records set record_stat_id = 3
+WHERE records.record_id=2;
+update LAZORENKO_AL.records set record_stat_id = 3
+WHERE records.record_id=3;
+update LAZORENKO_AL.records set record_stat_id = 3
+WHERE records.record_id=4;
+
+update LAZORENKO_AL.records set patient_id = 3
+WHERE records.record_id=1;
+
+update LAZORENKO_AL.ticket set appointment_beg ='2021-10-10 13:00:00', appointment_end='2021-10-10 13:30:00'
+WHERE ticket.ticket_id=23;
+
+insert into lazorenko_al.ticket (ticket_id, doctor_id, ticket_stat_id, appointment_beg, appointment_end)
+values (default, 4, 1, '2021-11-25 9:00:00', '2021-11-25 9:30:00');
+
+insert into lazorenko_al.records (record_id, record_stat_id, patient_id, ticket_id)
+values (default, 1, 1, 30);
+insert into lazorenko_al.records (record_id, record_stat_id, patient_id, ticket_id)
+values (default, 1, 2, 31);
+insert into lazorenko_al.records (record_id, record_stat_id, patient_id, ticket_id)
+values (default, 2, 2, 32);
+
+update LAZORENKO_AL.ticket set ticket_stat_id=2
+WHERE ticket.ticket_id<30;
+
+
+
