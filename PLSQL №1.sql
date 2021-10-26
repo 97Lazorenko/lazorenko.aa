@@ -171,6 +171,27 @@ arr(3) := 3;
 end;
 
 declare
+type arr_type is table of number
+index by binary_integer;
+arr arr_type;
+a binary_integer;
+begin
+arr(1) := 1;
+arr(2) := 2;
+arr(3) := 3;
+for i in arr.first..arr.last
+  loop
+    declare
+   /* v_index number := i;*/
+    v_item varchar2(100) :=arr(i);
+    begin
+    dbms_output.put_line(v_item); --забрать элемент
+    /*dbms_output.put_line(v_index);*/
+    end;
+  end loop;
+end;
+
+declare
 type arr_type is table of varchar2(2000)
 index by binary_integer;
 a_index binary_integer :=1;
@@ -195,3 +216,4 @@ loop
     a2_index := a_doctor2.next(a2_index);
     end loop;
 end;
+

@@ -1,3 +1,4 @@
+
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------- СТАТИЧЕСКИЕ КУРСОРЫ
 ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -158,9 +159,6 @@ BEGIN
 end;
 
 
-
-
-
 --query 7
 
 DECLARE
@@ -195,13 +193,13 @@ BEGIN
     loop
     FETCH c_get_info INTO v_record_beg_end;
     exit when c_get_info%notfound;
-    DBMS_OUTPUT.PUT_LINE(v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time || '; ' || 'время закрытия - ' || v_record_beg_end.end_time);
+    DBMS_OUTPUT.PUT_LINE(v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time || '; время закрытия - ' || v_record_beg_end.end_time);
     end loop;
     CLOSE c_get_info;
 end;
 
---query 8
 
+--query 8
 DECLARE
     v_pat_id number :=1; --есть 3 пацента, их id варьируются от 1 до 3 включительно;
     v_record_stat number :=1; --1 - действующая запись, 2 - отменённая запись, 3 - исполненная запись;
@@ -251,6 +249,7 @@ BEGIN
     CLOSE c_get_names;
 end;
 
+
 --query2
 DECLARE
     CURSOR c_get_names (
@@ -273,6 +272,7 @@ BEGIN
     end loop;
     CLOSE c_get_names;
 end;
+
 
 --query3
 DECLARE
@@ -309,6 +309,7 @@ BEGIN
     CLOSE c_get_info;
 end;
 
+
 --query4
 DECLARE
     CURSOR c_get_info (
@@ -337,6 +338,7 @@ BEGIN
     CLOSE c_get_info;
 end;
 
+
 --query5
 DECLARE
     CURSOR c_get_info (
@@ -360,6 +362,7 @@ p_doctor_id in number
         end loop;
         CLOSE c_get_info;
     end;
+
 
 --query 6
 DECLARE
@@ -391,7 +394,6 @@ end;
 
 
 --query 7
-
 DECLARE
     CURSOR c_get_info (
 p_hospital_id in number
@@ -425,10 +427,11 @@ BEGIN
     loop
     FETCH c_get_info INTO v_record_beg_end;
     exit when c_get_info%notfound;
-    DBMS_OUTPUT.PUT_LINE(v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time || '; ' || 'время закрытия - ' || v_record_beg_end.end_time);
+    DBMS_OUTPUT.PUT_LINE(v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time || '; время закрытия - ' || v_record_beg_end.end_time);
     end loop;
     CLOSE c_get_info;
 end;
+
 
 --query 8
 
@@ -495,6 +498,7 @@ declare
     type record8 is record(last_name varchar2(100), first_name varchar2(100),
     petronymic varchar2(100), dname varchar2(100), rec_stat varchar2(50), appointment_beg varchar2(100), appointment_end varchar2(100));
     v_patient1 record8; --для запроса 8
+
 BEGIN
     DBMS_OUTPUT.PUT_LINE( 'Запрос 1');---------------------------------------ЗАПРОС 1
     open v_cursor_1 for
@@ -561,8 +565,7 @@ order by di.qualification desc,
     loop
     FETCH v_cursor_1 INTO v_doctor;
     exit when v_cursor_1%notfound;
-    DBMS_OUTPUT.PUT_LINE('ФИО врача - ' || v_doctor.dname ||'; специальность - '|| v_doctor.spname
-                             || '; квалификация - ' || v_doctor.qualification);
+    DBMS_OUTPUT.PUT_LINE('ФИО врача - ' || v_doctor.dname ||'; специальность - '|| v_doctor.spname || '; квалификация - ' || v_doctor.qualification);
     end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
     DBMS_OUTPUT.PUT_LINE( 'Запрос 5');-----------------------------------ЗАПРОС 5
@@ -623,7 +626,7 @@ order by w.day;
     FETCH v_cursor_1 INTO v_record_beg_end;
     exit when v_cursor_1%notfound;
     DBMS_OUTPUT.PUT_LINE(v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time
-                             || '; ' || 'время закрытия - ' || v_record_beg_end.end_time);
+                             || '; время закрытия - ' || v_record_beg_end.end_time);
     end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
     DBMS_OUTPUT.PUT_LINE( 'Запрос 8');-----------------------------------ЗАПРОС 8
@@ -648,23 +651,8 @@ end;
 ---------------------------------------- НЕЯВНЫЕ КУРСОРЫ
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-declare
-type record1 is record (hospital_id number, name varchar2(100));
-    v_record record1;
-begin
-    for i in (
-        select h.hospital_id, h.name
-        from lazorenko_al.hospital h
-    )
-    loop
-    declare
-v_record record1:=i;
-    begin
-        dbms_output.put_line(i.hospital_id||', '||i.name);
-    end;
-    end loop;
-    end;
 --query1
+
 declare
 v_region_id number :=1;
 begin
@@ -673,11 +661,23 @@ begin
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
     where v_region_id=region_id)
     loop
-    begin
-        dbms_output.put_line(i.cn||', '||i.rn);
-    end;
+        dbms_output.put_line(i.cn||' - '||i.rn);
     end loop;
     end;
+
+/*
+declare
+v_region_id number :=1;
+cursor cursor1 is select c.name as cn, r.name as rn
+from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
+    where v_region_id=region_id;
+begin
+    for i in cursor1
+    loop
+        dbms_output.put_line(i.cn||' - '||i.rn);
+    end loop;
+    end;
+*/
 
 --query2
 declare
@@ -691,9 +691,7 @@ from specialisation s inner join doctor_spec using(spec_id)
 where s.delete_from_the_sys is null and d.dismiss_date is null
 and h.delete_from_the_sys is null and v_hospital_id=hospital_id)
     loop
-    begin
         dbms_output.put_line(i.name);
-    end;
     end loop;
     end;
 
@@ -719,9 +717,8 @@ order by o.name desc, количество_врачей desc, case
     else 0
 end desc)
     loop
-    begin
-        dbms_output.put_line(i.hname||', '||i.aname||', '||i.количество_врачей||', '||i.oname||', '||i.закрытие);
-    end;
+        dbms_output.put_line('название больницы - ' ||i.hname|| '; сейчас '||i.aname||'; число докторов указанной специальности=' ||i.количество_врачей||
+                         '; форма собственности - '||i.oname|| '; закрывается в ' ||i.закрытие);
     end loop;
     end;
 
@@ -742,11 +739,10 @@ order by di.qualification desc,
      case when zone_id=v_zone_id then 1
      else 0 end desc)
     loop
-    begin
-        dbms_output.put_line(i.dname||', '||i.sname||', '||i.qual);
-    end;
+        dbms_output.put_line('ФИО врача - ' ||i.dname||'; специальность - '||i.sname|| '; квалификация - ' ||i.qual);
     end loop;
     end;
+
 
 --query5
 declare
@@ -759,11 +755,10 @@ begin
     and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
     order by t.appointment_beg)
     loop
-    begin
-        dbms_output.put_line(i.ticket_id||', '||i.name||', '||i.appointment_beg||', '||i.appointment_end);
-    end;
+        dbms_output.put_line('id талона - ' ||i.ticket_id|| '; врач - ' ||i.name||'; начало приёма - '||i.appointment_beg|| '; конец приёма - ' ||i.appointment_end);
     end loop;
     end;
+
 
 --query6
 declare
@@ -779,11 +774,10 @@ from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(p
     right join lazorenko_al.documents d using(document_id)
     where document_id=v_document_id)
     loop
-    begin
-        dbms_output.put_line(i.last_name||', '||i.first_name||', '||i.petronymic||', '||i.name||', '||i.документ);
-    end;
+        dbms_output.put_line('ФИ(О) пациента - ' ||i.last_name||' '||i.first_name||' '||i.petronymic|| '; документ - ' ||i.name|| '; значение - ' ||i.документ);
     end loop;
     end;
+
 
 --query7
 declare
@@ -812,11 +806,10 @@ from hospital h left join work_time w using(hospital_id) inner join available a 
 where hospital_id=v_hospital_id and h.delete_from_the_sys is null
 order by w.day)
     loop
-    begin
-        dbms_output.put_line(i.день_недели||', '||i.время_открытия||', '||i.время_закрытия);
-    end;
+        dbms_output.put_line(i.день_недели|| '  ' || 'время открытия - ' ||i.время_открытия|| '; время закрытия - ' ||i.время_закрытия);
     end loop;
     end;
+
 
 --query8
 declare
@@ -829,9 +822,7 @@ from lazorenko_al.patient p left join lazorenko_al.records using(patient_id) inn
     inner join ticket using(ticket_id) inner join lazorenko_al.doctor d using(doctor_id)
     where patient_id=v_patient_id and record_stat_id=v_record_stat_id)
     loop
-    begin
-        dbms_output.put_line(i.last_name||', '||i.first_name||', '||i.petronymic||', '||i.d_name||', '||i.r_name
-                                 ||', '||i.appointment_beg||', '||i.appointment_end);
-    end;
+        dbms_output.put_line('пациент - '||i.last_name||' '||i.first_name||' '||i.petronymic|| '; врач - ' ||i.d_name|| '; статус записи - ' ||i.r_name
+                                 || '; начало приёма - '||i.appointment_beg|| '; конец приёма - ' ||i.appointment_end);
     end loop;
     end;
