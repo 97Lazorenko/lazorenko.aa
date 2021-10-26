@@ -119,6 +119,11 @@ values ('университет3', 5, 35000, 6, null, 45);
 insert into LAZORENKO_AL.doctors_info(education, qualification, salary, rating, reviews, doctor_id)
 values ('университет3', 15, 50000, 5, null, 46);
 
+
+
+------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------АКТУАЛЬНЫЕ ИЗМЕНЕНИЯ------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 insert into LAZORENKO_AL.hospital(name, availability_id, med_org_id, ownership_type_id, enter_into_the_sys, delete_from_the_sys)
 values ('тест', 1, 1, 1, default, null);
 
