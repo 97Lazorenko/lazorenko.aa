@@ -5,12 +5,13 @@
 --query1
 
 DECLARE
-    v_region_id number :=1;
+    v_filter number :=1; ---------------Включение(1) и отключение(0) фильтрации.
+    v_region_id number :=2;-------------При выключении фильтрации здесь ничего менять не требуется, в where и так сработает другое условие, будут отобраны все записи
     CURSOR c_get_names
     IS
     select c.name, r.name
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
-    where v_region_id=region_id;
+    where (v_region_id=region_id and v_filter=1) or (region_id>0 and v_filter=0);
     type record1 is record (cname varchar2(100), rname varchar2(100));
     v_city_region record1;
 BEGIN
@@ -26,15 +27,17 @@ end;
 --query2
 
 DECLARE
-    v_hospital_id number :=6;
+    v_filter number :=1; ---------------Включение(1) и отключение(0) фильтрации.
+    v_hospital_id number :=7;
     CURSOR c_get_names
     IS
     select distinct s.name
 from specialisation s inner join doctor_spec using(spec_id)
     inner join doctor d using(doctor_id)
     inner join hospital h using(hospital_id)
-where s.delete_from_the_sys is null and d.dismiss_date is null
-and h.delete_from_the_sys is null and v_hospital_id=hospital_id;
+where (s.delete_from_the_sys is null and d.dismiss_date is null
+and h.delete_from_the_sys is null and v_hospital_id=hospital_id and v_filter=1) or (s.delete_from_the_sys is null and d.dismiss_date is null
+and h.delete_from_the_sys is null and hospital_id>0 and v_filter=0);
     v_spec_name LAZORENKO_AL.specialisation.name%TYPE;
 BEGIN
     OPEN c_get_names;
@@ -48,6 +51,7 @@ end;
 
 --query3
 DECLARE
+    v_filter number :=1; ---------------Включение(1) и отключение(0) фильтрации.
     v_spec_id number :=2;
     CURSOR c_get_info
     IS
@@ -60,7 +64,8 @@ from hospital h left join work_time w using(hospital_id)
     inner join ownership_type o using(ownership_type_id)
     inner join doctor using(hospital_id) inner join doctor_spec using(doctor_id)
     inner join available a using(availability_id)
-where spec_id=v_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd')
+where (spec_id=v_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd') and v_filter=1) or
+      (spec_id>0 and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd') and v_filter=0)
 group by h.name, a.name, o.name, w.end_time
 order by o.name desc, количество_врачей desc, case
     when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
@@ -82,6 +87,7 @@ end;
 --query4
 
 DECLARE
+    v_filter number :=1; ---------------Включение(1) и отключение(0) фильтрации.
     v_hospital_id number :=5;
     v_zone_id number :=2;
     CURSOR c_get_info
@@ -91,7 +97,8 @@ from doctor d inner join doctor_spec using(doctor_id)
     inner join specialisation s using(spec_id)
     inner join doctors_info di using(doctor_id)
     inner join hospital using(hospital_id)
-where hospital_id=v_hospital_id and d.dismiss_date is null
+where (hospital_id=v_hospital_id and d.dismiss_date is null and v_filter=1) or
+      (hospital_id>0 and d.dismiss_date is null and v_filter=0)
 order by di.qualification desc,
      case
      when d.zone_id=v_zone_id then 1
@@ -110,13 +117,14 @@ end;
 
 --query5
 DECLARE
+    v_filter number :=1; ---------------Включение(1) и отключение(0) фильтрации.
     v_doctor_id number :=3;
     CURSOR c_get_info
     IS
     select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
     from ticket t right join doctor d using(doctor_id)
-    where doctor_id=v_doctor_id
-    and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
+    where (doctor_id=v_doctor_id and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') and v_filter=1) or
+          (doctor_id>0 and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') and v_filter=0)
     order by t.appointment_beg;
     type record1 is record (ticket_id number, dname varchar2(100), appointment_beg varchar2(100), appointment_end varchar2(100));
     v_ticket record1;
@@ -133,6 +141,7 @@ DECLARE
 
 --query 6
 DECLARE
+    v_filter number :=0; ---------------Включение(1) и отключение(0) фильтрации.
     v_doc number :=1;
     type record1 is record (last_name varchar2(100), first_name varchar2(100),
     petronymic varchar2(100), name varchar2(100), value varchar2(100));
@@ -146,7 +155,8 @@ DECLARE
 end as документ
 from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(patient_id)
     right join lazorenko_al.documents d using(document_id)
-    where document_id=v_doc;
+    where (document_id=v_doc and v_filter=1) or (document_id>0 and v_filter=0)
+    order by p.last_name;
 BEGIN
     OPEN c_get_names;
     loop
@@ -162,10 +172,11 @@ end;
 --query 7
 
 DECLARE
+    v_filter number :=1; ---------------Включение(1) и отключение(0) фильтрации.
     v_hospital_id number :=10;
     CURSOR c_get_info
     IS
-select
+select h.name,
 case
     when w.day=1 then 'понедельник'
     when w.day=2 then 'вторник    '
@@ -184,16 +195,17 @@ case
     else w.end_time
 end as время_закрытия
 from hospital h left join work_time w using(hospital_id) inner join available a using(availability_id)
-where hospital_id=v_hospital_id and h.delete_from_the_sys is null
-order by w.day;
-    type record1 is record (day varchar2(50), begin_time varchar2(100), end_time varchar2(100));
+where (hospital_id=v_hospital_id and h.delete_from_the_sys is null and v_filter=1) or (hospital_id>0 and h.delete_from_the_sys is null and v_filter=0)
+order by w.day, h.name;
+    type record1 is record (name varchar2(100), day varchar2(50), begin_time varchar2(100), end_time varchar2(100));
     v_record_beg_end record1;
 BEGIN
     OPEN c_get_info;
     loop
     FETCH c_get_info INTO v_record_beg_end;
     exit when c_get_info%notfound;
-    DBMS_OUTPUT.PUT_LINE(v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time || '; время закрытия - ' || v_record_beg_end.end_time);
+    DBMS_OUTPUT.PUT_LINE('название мед.учреждения - '||v_record_beg_end.name ||': '||v_record_beg_end.day || '  ' || 'время открытия - '
+                             || v_record_beg_end.begin_time || '; время закрытия - ' || v_record_beg_end.end_time);
     end loop;
     CLOSE c_get_info;
 end;
@@ -201,6 +213,8 @@ end;
 
 --query 8
 DECLARE
+    v_filter_patient number :=1; ---------------Включение(1) и отключение(0) фильтрации пациентов.
+    v_filter_rec_stat number :=1; --------------Включение(1) и отключение(0) фильтрации статусов записей журнала.
     v_pat_id number :=1; --есть 3 пацента, их id варьируются от 1 до 3 включительно;
     v_record_stat number :=1; --1 - действующая запись, 2 - отменённая запись, 3 - исполненная запись;
     type record1 is record(last_name varchar2(100), first_name varchar2(100),
@@ -211,7 +225,10 @@ DECLARE
     select last_name, first_name, petronymic, d.name, record_status.name, appointment_beg, appointment_end
 from lazorenko_al.patient p left join lazorenko_al.records using(patient_id) inner join record_status using(record_stat_id) inner join ticket using(ticket_id)
     inner join lazorenko_al.doctor d using(doctor_id)
-    where patient_id=v_pat_id and record_stat_id=v_record_stat;
+    where (patient_id=v_pat_id and record_stat_id=v_record_stat and v_filter_patient=1 and v_filter_rec_stat=1)
+       or (patient_id>0 and record_stat_id=v_record_stat and v_filter_patient=0 and v_filter_rec_stat=1)
+       or (patient_id=v_pat_id and record_stat_id>0 and v_filter_patient=1 and v_filter_rec_stat=0)
+       or (patient_id>0 and record_stat_id>0 and v_filter_patient=0 and v_filter_rec_stat=0);
 BEGIN
     OPEN c_get_names;
     loop
@@ -231,16 +248,16 @@ end;
 --query1
 DECLARE
     CURSOR c_get_names (
-p_region_id in number
+p_filter in number, p_region_id in number
     )
     IS
     select c.name, r.name
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
-    where p_region_id=region_id;
+    where (p_region_id=region_id and p_filter=1) or (region_id>0 and p_filter=0);
     type record1 is record (cname varchar2(100), rname varchar2(100));
     v_city_region record1;
 BEGIN
-    OPEN c_get_names(1); -------------------------------------------ПАРАМЕТР ЗДЕСЬ
+    OPEN c_get_names(1, 1); -------------------------------------------ПАРАМЕТРы ЗДЕСЬ. ПЕРВЫЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ.
     loop
     FETCH c_get_names INTO v_city_region;
     exit when c_get_names%notfound;
@@ -249,22 +266,21 @@ BEGIN
     CLOSE c_get_names;
 end;
 
-
 --query2
 DECLARE
     CURSOR c_get_names (
-p_hospital_id in number
+p_filter in number, p_hospital_id in number
     )
     IS
     select distinct s.name
 from specialisation s inner join doctor_spec using(spec_id)
     inner join doctor d using(doctor_id)
     inner join hospital h using(hospital_id)
-where s.delete_from_the_sys is null and d.dismiss_date is null
-and h.delete_from_the_sys is null and p_hospital_id=hospital_id;
+where (s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null and p_hospital_id=hospital_id and p_filter=1)
+   or (s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null and hospital_id>0 and p_filter=0);
     v_spec_name LAZORENKO_AL.specialisation.name%TYPE;
 BEGIN
-    OPEN c_get_names(10); -------------------------------------------ПАРАМЕТР ЗДЕСЬ
+    OPEN c_get_names(1, 10); -------------------------------------------ПАРАМЕТР ЗДЕСЬ. ПЕРВЫЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ.
     loop
     FETCH c_get_names INTO v_spec_name;
     exit when c_get_names%notfound;
@@ -277,7 +293,7 @@ end;
 --query3
 DECLARE
     CURSOR c_get_info (
-p_spec_id in number
+p_filter in number, p_spec_id in number
     )
     IS
 select h.name, a.name, count(doctor_id) as количество_врачей, o.name,
@@ -289,7 +305,8 @@ from hospital h left join work_time w using(hospital_id)
     inner join ownership_type o using(ownership_type_id)
     inner join doctor using(hospital_id) inner join doctor_spec using(doctor_id)
     inner join available a using(availability_id)
-where spec_id=p_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd')
+where (spec_id=p_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd') and p_filter=1) or
+      (spec_id>0 and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd') and p_filter=0)
 group by h.name, a.name, o.name, w.end_time
 order by o.name desc, количество_врачей desc, case
     when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
@@ -298,7 +315,7 @@ end desc;
     type record1 is record (hname varchar2(100), aname varchar2(100), doctor_count number, oname varchar2(100), end_time varchar2(100));
     v_hospital_time record1;
 BEGIN
-    OPEN c_get_info(2); -------------------------------------------ПАРАМЕТР ЗДЕСЬ
+    OPEN c_get_info(1, 2); -------------------------------------------ПАРАМЕТР ЗДЕСЬ. ПЕРВЫЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ.
     loop
     FETCH c_get_info INTO v_hospital_time;
     exit when c_get_info%notfound;
@@ -313,7 +330,7 @@ end;
 --query4
 DECLARE
     CURSOR c_get_info (
-p_hospital_id in number, p_zone_id in number
+p_filter in number, p_hospital_id in number, p_zone_id in number
     )
     IS
     select d.name, s.name, di.qualification
@@ -321,7 +338,7 @@ from doctor d inner join doctor_spec using(doctor_id)
     inner join specialisation s using(spec_id)
     inner join doctors_info di using(doctor_id)
     inner join hospital using(hospital_id)
-where hospital_id=p_hospital_id and d.dismiss_date is null
+where (hospital_id=p_hospital_id and d.dismiss_date is null and p_filter=1) or (hospital_id>0 and d.dismiss_date is null and p_filter=0)
 order by di.qualification desc,
      case
      when d.zone_id=p_zone_id then 1
@@ -329,7 +346,8 @@ order by di.qualification desc,
     type record1 is record (dname varchar2(100), spname varchar2(100), qualification number);
     v_doctor record1;
 BEGIN
-    OPEN c_get_info(5, 2); -------------------------------------------ПАРАМЕТРЫ ЗДЕСЬ
+    OPEN c_get_info(1, 5, 2); -------------------------------------------ПАРАМЕТРЫ ЗДЕСЬ. ПЕРВЫЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ.
+    ---------------------------------------------------------------------ФИЛЬТРАЦИЯ НЕ ВЛИЯЕТ НА ПОСЛЕДНИЙ ПАРАМЕТР (ПО ЗАДУМКЕ)
     loop
     FETCH c_get_info INTO v_doctor;
     exit when c_get_info%notfound;
@@ -342,18 +360,18 @@ end;
 --query5
 DECLARE
     CURSOR c_get_info (
-p_doctor_id in number
+p_filter in number, p_doctor_id in number
     )
     IS
     select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
     from ticket t right join doctor d using(doctor_id)
-    where doctor_id=p_doctor_id
-    and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
+    where (doctor_id=p_doctor_id and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') and p_filter=1)
+       or (doctor_id>0 and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') and p_filter=0)
     order by t.appointment_beg;
     type record1 is record (ticket_id number, dname varchar2(100), appointment_beg varchar2(100), appointment_end varchar2(100));
     v_ticket record1;
     BEGIN
-        OPEN c_get_info(3); -------------------------------------------ПАРАМЕТР ЗДЕСЬ
+        OPEN c_get_info(0, 3); -------------------------------------------ПАРАМЕТР ЗДЕСЬ. ПЕРВЫЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ.
         loop
         FETCH c_get_info INTO v_ticket;
         exit when c_get_info%notfound;
@@ -370,7 +388,7 @@ DECLARE
     petronymic varchar2(100), name varchar2(100), value varchar2(100));
     v_patient record1;
     CURSOR c_get_names (
-p_document_id in number
+p_filter in number, p_document_id in number
     )
     IS
     select p.last_name, p.first_name, p.petronymic, d.name,
@@ -380,9 +398,10 @@ p_document_id in number
 end as документ
 from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(patient_id)
     right join lazorenko_al.documents d using(document_id)
-    where document_id=p_document_id;
+    where (document_id=p_document_id and p_filter=1) or (document_id>0 and p_filter=0)
+    order by p.last_name;
 BEGIN
-    OPEN c_get_names(1); -------------------------------------------ПАРАМЕТР ЗДЕСЬ
+    OPEN c_get_names(1, 1); -------------------------------------------ПАРАМЕТР ЗДЕСЬ. ПЕРВЫЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ.
     loop
     FETCH c_get_names INTO v_patient;
     exit when c_get_names%notfound;
@@ -396,10 +415,10 @@ end;
 --query 7
 DECLARE
     CURSOR c_get_info (
-p_hospital_id in number
+p_filter in number, p_hospital_id in number
     )
     IS
-select
+select h.name,
 case
     when w.day=1 then 'понедельник'
     when w.day=2 then 'вторник    '
@@ -418,16 +437,17 @@ case
     else w.end_time
 end as время_закрытия
 from hospital h left join work_time w using(hospital_id) inner join available a using(availability_id)
-where hospital_id=p_hospital_id and h.delete_from_the_sys is null
-order by w.day;
-    type record1 is record (day varchar2(50), begin_time varchar2(100), end_time varchar2(100));
+where (hospital_id=p_hospital_id and h.delete_from_the_sys is null and p_filter=1) or (hospital_id>0 and h.delete_from_the_sys is null and p_filter=0)
+order by w.day, h.name;
+    type record1 is record (name varchar2(100), day varchar2(50), begin_time varchar2(100), end_time varchar2(100));
     v_record_beg_end record1;
 BEGIN
-    OPEN c_get_info(10); -------------------------------------------ПАРАМЕТР ЗДЕСЬ
+    OPEN c_get_info(1, 10); -------------------------------------------ПАРАМЕТР ЗДЕСЬ. ПЕРВЫЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ.
     loop
     FETCH c_get_info INTO v_record_beg_end;
     exit when c_get_info%notfound;
-    DBMS_OUTPUT.PUT_LINE(v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time || '; время закрытия - ' || v_record_beg_end.end_time);
+    DBMS_OUTPUT.PUT_LINE('название мед.учреждения - '|| v_record_beg_end.name || ' ' ||v_record_beg_end.day || '  ' || 'время открытия - ' ||
+                         v_record_beg_end.begin_time || '; время закрытия - ' || v_record_beg_end.end_time);
     end loop;
     CLOSE c_get_info;
 end;
@@ -440,17 +460,21 @@ DECLARE
     petronymic varchar2(100), dname varchar2(100), rec_stat varchar2(50), appointment_beg varchar2(100), appointment_end varchar2(100));
     v_patient record1;
     CURSOR c_get_names (
-p_patient_id in number, p_record_stat_id number
+p_filter_patient in number, p_filter_rec_stat in number, p_patient_id in number, p_record_stat_id number
     )
     IS
     select last_name, first_name, petronymic, d.name, record_status.name, appointment_beg, appointment_end
 from lazorenko_al.patient p left join lazorenko_al.records using(patient_id) inner join record_status using(record_stat_id) inner join ticket using(ticket_id)
     inner join lazorenko_al.doctor d using(doctor_id)
-    where patient_id=p_patient_id and record_stat_id=p_record_stat_id;
+    where (patient_id=p_patient_id and record_stat_id=p_record_stat_id and p_filter_patient=1 and p_filter_rec_stat=1) or
+          (patient_id>0 and record_stat_id=p_record_stat_id and p_filter_patient=0 and p_filter_rec_stat=1) or
+          (patient_id=p_patient_id and record_stat_id>0 and p_filter_patient=1 and p_filter_rec_stat=0) or
+          (patient_id>0 and record_stat_id>0 and p_filter_patient=0 and p_filter_rec_stat=0);
 BEGIN
-    OPEN c_get_names(1, 1); -------------------------------------------ПАРАМЕТРы ЗДЕСЬ
-    -- есть 3 пацента, их id варьируются от 1 до 3 включительно (первый параметр);
-    -- второй параметр: 1 - действующая запись, 2 - отменённая запись, 3 - исполненная запись;
+    OPEN c_get_names(1, 1, 1, 1); -------------------------------------------ПАРАМЕТРЫ ЗДЕСЬ. ПЕРВЫЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ ДЛЯ ПАЦИЕНТОВ.
+    -------------------------------------------------------------------ВТОРОЙ ПАРАМЕТР ВКЛЮЧАЕТ(1) ИЛИ ОТКЛЮЧАЕТ(0) ФИЛЬТРАЦИЮ ДЛЯ СТАТУСОВ ЗАПИСЕЙ ЖУРНАЛОВ.
+    -- есть 3 пацента, их id варьируются от 1 до 3 включительно (третий параметр);
+    -- второй параметр: 1 - действующая запись, 2 - отменённая запись, 3 - исполненная запись (четвёртый параметр);
     loop
     FETCH c_get_names INTO v_patient;
     exit when c_get_names%notfound;
@@ -469,6 +493,16 @@ end;
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 declare
+    v_filter1 number:=1;---------------Включение(1) и отключение(0) фильтрации в запросе 1.
+    v_filter2 number:=1;---------------Включение(1) и отключение(0) фильтрации в запросе 2.
+    v_filter3 number:=1;---------------Включение(1) и отключение(0) фильтрации в запросе 3.
+    v_filter4 number:=1;---------------Включение(1) и отключение(0) фильтрации в запросе 4.
+    v_filter5 number:=1;---------------Включение(1) и отключение(0) фильтрации в запросе 5.
+    v_filter6 number:=1;---------------Включение(1) и отключение(0) фильтрации в запросе 6.
+    v_filter7 number:=1;---------------Включение(1) и отключение(0) фильтрации в запросе 7.
+    v_filter81 number:=1;--------------Включение(1) и отключение(0) фильтрации пациентов в запросе 8.
+    v_filter82 number:=1;--------------Включение(1) и отключение(0) фильтрации статусов записей журнала в запросе 8.
+
     v_region_id number :=1; --для запроса 1
     v_hospital_id number :=10; --для запроса 2, 4 и 7
     v_spec_id number :=2; --для запроса 3
@@ -493,39 +527,39 @@ declare
     type record6 is record (last_name varchar2(100), first_name varchar2(100),
     petronymic varchar2(100), name varchar2(100), value varchar2(100));
     v_patient record6; --для запроса 6
-    type record7 is record (day varchar2(50), begin_time varchar2(100), end_time varchar2(100));
+    type record7 is record (name varchar2(100), day varchar2(50), begin_time varchar2(100), end_time varchar2(100));
     v_record_beg_end record7; --для запроса 7
     type record8 is record(last_name varchar2(100), first_name varchar2(100),
     petronymic varchar2(100), dname varchar2(100), rec_stat varchar2(50), appointment_beg varchar2(100), appointment_end varchar2(100));
     v_patient1 record8; --для запроса 8
 
 BEGIN
-    DBMS_OUTPUT.PUT_LINE( 'Запрос 1');---------------------------------------ЗАПРОС 1
+    DBMS_OUTPUT.PUT_LINE( 'Запрос 1');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\------------------ЗАПРОС 1
     open v_cursor_1 for
 select c.name, r.name
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
-    where v_region_id=region_id;
+    where (v_region_id=region_id and v_filter1=1) or (region_id>0 and v_filter1=0);
     loop
     FETCH v_cursor_1 INTO v_city_region;
     exit when v_cursor_1%notfound;
     DBMS_OUTPUT.PUT_LINE( v_city_region.cname ||' - '|| v_city_region.rname);
     end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
-    DBMS_OUTPUT.PUT_LINE( 'Запрос 2');-------------------------------------ЗАПРОС 2
+    DBMS_OUTPUT.PUT_LINE( 'Запрос 2');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\----------------ЗАПРОС 2
     open v_cursor_1 for
 select distinct s.name
 from specialisation s inner join doctor_spec using(spec_id)
     inner join doctor d using(doctor_id)
     inner join hospital h using(hospital_id)
-where s.delete_from_the_sys is null and d.dismiss_date is null
-and h.delete_from_the_sys is null and v_hospital_id=hospital_id;
+where (s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null and v_hospital_id=hospital_id and v_filter2=1) or
+      (s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null and hospital_id>0 and v_filter2=0);
 loop
     FETCH v_cursor_1 INTO v_spec_name;
     exit when v_cursor_1%notfound;
     DBMS_OUTPUT.PUT_LINE(v_spec_name.spec_name);
     end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
-    DBMS_OUTPUT.PUT_LINE( 'Запрос 3');--------------------------------------ЗАПРОС 3
+    DBMS_OUTPUT.PUT_LINE( 'Запрос 3');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----------------ЗАПРОС 3
     open v_cursor_1 for
 select h.name, a.name, count(doctor_id) as количество_врачей, o.name,
 case
@@ -536,7 +570,8 @@ from hospital h left join work_time w using(hospital_id)
     inner join ownership_type o using(ownership_type_id)
     inner join doctor using(hospital_id) inner join doctor_spec using(doctor_id)
     inner join available a using(availability_id)
-where spec_id=v_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd')
+where (spec_id=v_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd') and v_filter3=1) or
+      (spec_id>0 and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd') and v_filter3=0)
 group by h.name, a.name, o.name, w.end_time
 order by o.name desc, количество_врачей desc, case
     when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
@@ -550,14 +585,14 @@ end desc;
                          '; форма собственности - '|| v_hospital_time.oname || '; закрывается в ' || v_hospital_time.end_time);
     end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
-    DBMS_OUTPUT.PUT_LINE( 'Запрос 4');-----------------------------------ЗАПРОС 4
+    DBMS_OUTPUT.PUT_LINE( 'Запрос 4');------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-----------------ЗАПРОС 4
     open v_cursor_1 for
 select d.name, s.name, di.qualification
 from doctor d inner join doctor_spec using(doctor_id)
     inner join specialisation s using(spec_id)
     inner join doctors_info di using(doctor_id)
     inner join hospital using(hospital_id)
-where hospital_id=v_hospital_id and d.dismiss_date is null
+where (hospital_id=v_hospital_id and d.dismiss_date is null and v_filter4=1) or (hospital_id>0 and d.dismiss_date is null and v_filter4=0)
 order by di.qualification desc,
      case
      when d.zone_id=v_zone_id then 1
@@ -568,12 +603,12 @@ order by di.qualification desc,
     DBMS_OUTPUT.PUT_LINE('ФИО врача - ' || v_doctor.dname ||'; специальность - '|| v_doctor.spname || '; квалификация - ' || v_doctor.qualification);
     end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
-    DBMS_OUTPUT.PUT_LINE( 'Запрос 5');-----------------------------------ЗАПРОС 5
+    DBMS_OUTPUT.PUT_LINE( 'Запрос 5');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\--------------ЗАПРОС 5
     open v_cursor_1 for
 select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
     from ticket t right join doctor d using(doctor_id)
-    where doctor_id=v_doctor_id
-    and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
+    where (doctor_id=v_doctor_id and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') and v_filter5=1) or
+          (doctor_id>0 and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') and v_filter5=0)
     order by t.appointment_beg;
         loop
         FETCH v_cursor_1 INTO v_ticket;
@@ -582,7 +617,7 @@ select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
                              v_ticket.appointment_beg || '; конец приёма - ' || v_ticket.appointment_end);
         end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
-    DBMS_OUTPUT.PUT_LINE( 'Запрос 6');-----------------------------------ЗАПРОС 6
+    DBMS_OUTPUT.PUT_LINE( 'Запрос 6');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\--------------ЗАПРОС 6
     open v_cursor_1 for
 select p.last_name, p.first_name, p.petronymic, d.name,
     case
@@ -591,7 +626,8 @@ select p.last_name, p.first_name, p.petronymic, d.name,
 end as документ
 from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(patient_id)
     right join lazorenko_al.documents d using(document_id)
-    where document_id=v_document_id;
+    where (document_id=v_document_id and v_filter6=1) or (document_id>0 and v_filter6=0)
+    order by p.last_name;
     loop
     FETCH v_cursor_1 INTO v_patient;
     exit when v_cursor_1%notfound;
@@ -599,9 +635,9 @@ from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(p
                          || ' ' || v_patient.petronymic || '; документ - ' || v_patient.name || '; значение - ' || v_patient.value);
     end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
-    DBMS_OUTPUT.PUT_LINE( 'Запрос 7');----------------------------------ЗАПРОС 7
+    DBMS_OUTPUT.PUT_LINE( 'Запрос 7');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-------------ЗАПРОС 7
     open v_cursor_1 for
-select
+select h.name,
 case
     when w.day=1 then 'понедельник'
     when w.day=2 then 'вторник    '
@@ -620,22 +656,26 @@ case
     else w.end_time
 end as время_закрытия
 from hospital h left join work_time w using(hospital_id) inner join available a using(availability_id)
-where hospital_id=v_hospital_id and h.delete_from_the_sys is null
-order by w.day;
+where (hospital_id=v_hospital_id and h.delete_from_the_sys is null and v_filter7=1) or
+      (hospital_id>0 and h.delete_from_the_sys is null and v_filter7=0)
+order by w.day, h.name;
     loop
     FETCH v_cursor_1 INTO v_record_beg_end;
     exit when v_cursor_1%notfound;
-    DBMS_OUTPUT.PUT_LINE(v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time
+    DBMS_OUTPUT.PUT_LINE('название мед.учреждения - '|| v_record_beg_end.name||' '||v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time
                              || '; время закрытия - ' || v_record_beg_end.end_time);
     end loop;
     DBMS_OUTPUT.PUT_LINE( ' ');
-    DBMS_OUTPUT.PUT_LINE( 'Запрос 8');-----------------------------------ЗАПРОС 8
+    DBMS_OUTPUT.PUT_LINE( 'Запрос 8');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\--------------ЗАПРОС 8
     open v_cursor_1 for
     select last_name, first_name, petronymic, d.name, record_status.name, appointment_beg, appointment_end
 from lazorenko_al.patient p left join lazorenko_al.records using(patient_id) inner join record_status using(record_stat_id)
     inner join ticket using(ticket_id)
     inner join lazorenko_al.doctor d using(doctor_id)
-    where patient_id=v_patient_id and record_stat_id=v_record_stat_id;
+    where (patient_id=v_patient_id and record_stat_id=v_record_stat_id and v_filter81=1 and v_filter82=1) or
+          (patient_id>0 and record_stat_id=v_record_stat_id and v_filter81=0 and v_filter82=1) or
+          (patient_id=v_patient_id and record_stat_id>0 and v_filter81=1 and v_filter82=0) or
+          (patient_id>0 and record_stat_id>0 and v_filter81=0 and v_filter82=0);
     loop
     FETCH v_cursor_1 INTO v_patient1;
     exit when v_cursor_1%notfound;
@@ -654,12 +694,13 @@ end;
 --query1
 
 declare
+v_filter number :=1; ---------------Включение(1) и отключение(0) фильтрации.
 v_region_id number :=1;
 begin
     for i in
         (select c.name as cn, r.name as rn
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
-    where v_region_id=region_id)
+    where (v_region_id=region_id and v_filter=1) or (region_id>0 and v_filter=0))
     loop
         dbms_output.put_line(i.cn||' - '||i.rn);
     end loop;
@@ -668,9 +709,10 @@ from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
 /*
 declare
 v_region_id number :=1;
+v_filter number :=1; ---------------Включение(1) и отключение(0) фильтрации.
 cursor cursor1 is select c.name as cn, r.name as rn
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
-    where v_region_id=region_id;
+    where (v_region_id=region_id and v_filter=1) or (region_id>0 and v_filter=0);
 begin
     for i in cursor1
     loop
@@ -681,15 +723,16 @@ begin
 
 --query2
 declare
-v_hospital_id number :=6;
+v_filter number :=1;---------------Включение(1) и отключение(0) фильтрации.
+v_hospital_id number :=8;
 begin
     for i in
         (select distinct s.name
 from specialisation s inner join doctor_spec using(spec_id)
     inner join doctor d using(doctor_id)
     inner join hospital h using(hospital_id)
-where s.delete_from_the_sys is null and d.dismiss_date is null
-and h.delete_from_the_sys is null and v_hospital_id=hospital_id)
+where (s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null and v_hospital_id=hospital_id and v_filter=1) or
+      (s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null and hospital_id>0 and v_filter=0))
     loop
         dbms_output.put_line(i.name);
     end loop;
@@ -698,6 +741,7 @@ and h.delete_from_the_sys is null and v_hospital_id=hospital_id)
 
 --query3
 declare
+v_filter number :=1;---------------Включение(1) и отключение(0) фильтрации.
 v_spec_id number :=2;
 begin
     for i in
@@ -710,7 +754,8 @@ from hospital h left join work_time w using(hospital_id)
     inner join ownership_type o using(ownership_type_id)
     inner join doctor using(hospital_id) inner join doctor_spec using(doctor_id)
     inner join available a using(availability_id)
-where spec_id=v_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd')
+where (spec_id=v_spec_id and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd') and v_filter=1) or
+      (spec_id>0 and h.delete_from_the_sys is null and w.day in to_char(sysdate, 'd') and v_filter=0)
 group by h.name, a.name, o.name, w.end_time
 order by o.name desc, количество_врачей desc, case
     when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
@@ -725,6 +770,7 @@ end desc)
 
 --query4
 declare
+v_filter number :=1;---------------Включение(1) и отключение(0) фильтрации.
 v_hospital_id number :=5;
 v_zone_id number :=2;
 begin
@@ -734,7 +780,7 @@ from doctor d inner join doctor_spec using(doctor_id)
     inner join specialisation s using(spec_id)
     inner join doctors_info di using(doctor_id)
     inner join hospital using(hospital_id)
-where hospital_id=v_hospital_id and d.dismiss_date is null
+where (hospital_id=v_hospital_id and d.dismiss_date is null and v_filter=1) or (hospital_id>0 and d.dismiss_date is null and v_filter=0)
 order by di.qualification desc,
      case when zone_id=v_zone_id then 1
      else 0 end desc)
@@ -746,13 +792,14 @@ order by di.qualification desc,
 
 --query5
 declare
+v_filter number :=1;---------------Включение(1) и отключение(0) фильтрации.
 v_doctor_id number :=3;
 begin
     for i in
         (select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
     from ticket t right join doctor d using(doctor_id)
-    where doctor_id=v_doctor_id
-    and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
+    where (doctor_id=v_doctor_id and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') and v_filter=1) or
+          (doctor_id>0 and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') and v_filter=0)
     order by t.appointment_beg)
     loop
         dbms_output.put_line('id талона - ' ||i.ticket_id|| '; врач - ' ||i.name||'; начало приёма - '||i.appointment_beg|| '; конец приёма - ' ||i.appointment_end);
@@ -762,6 +809,7 @@ begin
 
 --query6
 declare
+v_filter number :=1;---------------Включение(1) и отключение(0) фильтрации.
 v_document_id number :=3;
 begin
     for i in
@@ -772,7 +820,8 @@ begin
 end as документ
 from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(patient_id)
     right join lazorenko_al.documents d using(document_id)
-    where document_id=v_document_id)
+    where (document_id=v_document_id and v_filter=1) or (document_id>0 and v_filter=0)
+    order by p.last_name)
     loop
         dbms_output.put_line('ФИ(О) пациента - ' ||i.last_name||' '||i.first_name||' '||i.petronymic|| '; документ - ' ||i.name|| '; значение - ' ||i.документ);
     end loop;
@@ -781,10 +830,11 @@ from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(p
 
 --query7
 declare
+v_filter number :=1;---------------Включение(1) и отключение(0) фильтрации.
 v_hospital_id number :=6;
 begin
     for i in
-        (select
+        (select h.name,
 case
     when w.day=1 then 'понедельник'
     when w.day=2 then 'вторник    '
@@ -803,24 +853,30 @@ case
     else w.end_time
 end as время_закрытия
 from hospital h left join work_time w using(hospital_id) inner join available a using(availability_id)
-where hospital_id=v_hospital_id and h.delete_from_the_sys is null
-order by w.day)
+where (hospital_id=v_hospital_id and h.delete_from_the_sys is null and v_filter=1) or
+      (hospital_id>0 and h.delete_from_the_sys is null and v_filter=0)
+order by w.day, h.name)
     loop
-        dbms_output.put_line(i.день_недели|| '  ' || 'время открытия - ' ||i.время_открытия|| '; время закрытия - ' ||i.время_закрытия);
+        dbms_output.put_line('название мед.учреждения - '|| i.name ||' '||i.день_недели|| '  ' || 'время открытия - ' ||i.время_открытия|| '; время закрытия - ' ||i.время_закрытия);
     end loop;
     end;
 
 
 --query8
 declare
+v_filter_patient number :=1;---------------Включение(1) и отключение(0) фильтрации пациентов.
+v_filter_rec_stat number :=1;--------------Включение(1) и отключение(0) фильтрации статусов записей журнала.
 v_patient_id number :=1;
-v_record_stat_id number :=1;
+v_record_stat_id number :=3;
 begin
     for i in
         (select last_name, first_name, petronymic, d.name as d_name, record_status.name as r_name, appointment_beg, appointment_end
 from lazorenko_al.patient p left join lazorenko_al.records using(patient_id) inner join record_status using(record_stat_id)
     inner join ticket using(ticket_id) inner join lazorenko_al.doctor d using(doctor_id)
-    where patient_id=v_patient_id and record_stat_id=v_record_stat_id)
+    where (patient_id=v_patient_id and record_stat_id=v_record_stat_id and v_filter_patient=1 and v_filter_rec_stat=1) or
+          (patient_id>0 and record_stat_id=v_record_stat_id and v_filter_patient=0 and v_filter_rec_stat=1) or
+          (patient_id=v_patient_id and record_stat_id>0 and v_filter_patient=1 and v_filter_rec_stat=0) or
+          (patient_id>0 and record_stat_id>0 and v_filter_patient=0 and v_filter_rec_stat=0))
     loop
         dbms_output.put_line('пациент - '||i.last_name||' '||i.first_name||' '||i.petronymic|| '; врач - ' ||i.d_name|| '; статус записи - ' ||i.r_name
                                  || '; начало приёма - '||i.appointment_beg|| '; конец приёма - ' ||i.appointment_end);
