@@ -578,7 +578,7 @@ order by di.qualification desc,
     DBMS_OUTPUT.PUT_LINE( ' ');
     DBMS_OUTPUT.PUT_LINE( 'Запрос 5');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\--------------ЗАПРОС 5
     open v_cursor_1 for
-select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
+    select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
     from ticket t right join doctor d using(doctor_id)
     where (doctor_id=v_doctor_id or v_doctor_id is null) and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
     order by t.appointment_beg;
