@@ -67,7 +67,8 @@ open v_cursor_1 for
 from specialisation s inner join doctor_spec using(spec_id)
     inner join doctor d using(doctor_id)
     inner join hospital h using(hospital_id)
-where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null and (p_hospital_id=hospital_id or p_hospital_id is null);
+where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null
+      and (p_hospital_id=hospital_id or p_hospital_id is null);
 return v_cursor_1;
 end;
 
@@ -96,7 +97,8 @@ begin
 from specialisation s inner join doctor_spec using(spec_id)
     inner join doctor d using(doctor_id)
     inner join hospital h using(hospital_id)
-where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null and (p_hospital_id=hospital_id or p_hospital_id is null);
+where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null
+      and (p_hospital_id=hospital_id or p_hospital_id is null);
 end;
 
 declare
@@ -294,8 +296,9 @@ begin
     loop
         fetch v_cursor into v_record_beg_end;
         exit when v_cursor%notfound;
-        dbms_output.put_line ('название мед.учреждения - '|| v_record_beg_end.name||' '||v_record_beg_end.day || '  ' || 'время открытия - ' || v_record_beg_end.begin_time
-                             || '; время закрытия - ' || v_record_beg_end.end_time);
+        dbms_output.put_line ('название мед.учреждения - '|| v_record_beg_end.name||' '||v_record_beg_end.day
+                                  || '  ' || 'время открытия - ' || v_record_beg_end.begin_time || '; время закрытия - '
+                                  || v_record_beg_end.end_time);
     end loop;
     close v_cursor;
 end;
@@ -325,9 +328,9 @@ begin
     loop
     FETCH v_cursor_1 INTO v_patient;
     exit when v_cursor_1%notfound;
-    DBMS_OUTPUT.PUT_LINE( 'пациент - '|| v_patient.last_name ||' '|| v_patient.first_name || ' ' || v_patient.petronymic || '; врач - ' ||
-                          v_patient.dname || '; статус записи - ' || v_patient.rec_stat || '; начало приёма - '
-                             || v_patient.appointment_beg || '; конец приёма - ' || v_patient.appointment_end);
+    DBMS_OUTPUT.PUT_LINE( 'пациент - '|| v_patient.last_name ||' '|| v_patient.first_name || ' ' || v_patient.petronymic
+    || '; врач - ' || v_patient.dname || '; статус записи - ' || v_patient.rec_stat || '; начало приёма - '
+    || v_patient.appointment_beg || '; конец приёма - ' || v_patient.appointment_end);
     end loop;
     close v_cursor_1;
 end;
