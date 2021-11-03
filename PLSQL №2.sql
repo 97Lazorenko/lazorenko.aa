@@ -356,7 +356,7 @@ p_doctor_id in number
     type record1 is record (ticket_id number, dname varchar2(100), appointment_beg varchar2(100), appointment_end varchar2(100));
     v_ticket record1;
     BEGIN
-        OPEN c_get_info(3); -------------------------------------------ПАРАМЕТР ЗДЕСЬ.
+        OPEN c_get_info(null); -------------------------------------------ПАРАМЕТР ЗДЕСЬ.
         loop
         FETCH c_get_info INTO v_ticket;
         exit when c_get_info%notfound;

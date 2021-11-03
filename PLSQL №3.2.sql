@@ -114,7 +114,7 @@ begin
     select case
         when t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') then 1
         when t.appointment_beg<to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') then 0
-        end
+        end  as valid_time
     into valid_time
     from lazorenko_al.ticket t
     where t.ticket_id=p_ticket_id;
@@ -123,7 +123,7 @@ end;
 declare
    valid_time number;
 begin
-    valid_time :=lazorenko_al.ticket_check(33);
+    valid_time :=lazorenko_al.time_check(33);
     DBMS_OUTPUT.PUT_LINE( valid_time);
 end;
 
