@@ -100,3 +100,78 @@ begin
     valid_doctor_not_deleted, valid_spec_not_deleted,
     valid_patient_doc, valid_IN_parameters, p_patient_id, p_ticket_id);
 end;
+
+--НОВЫЙ ВАРИАНТ
+--ФУНКЦИЯ ЗАПИСИ
+create or replace function write_to_records(
+p_patient_id in number,
+p_ticket_id in number)
+return lazorenko_al.records.record_id%type as
+ v_record_id lazorenko_al.records.record_id%type;
+begin
+    insert into lazorenko_al.records(record_id, record_stat_id, patient_id, ticket_id)
+    values (default, 1, p_patient_id, p_ticket_id)
+    returning record_id into v_record_id;
+    update lazorenko_al.ticket t set t.ticket_stat_id=2 where t.ticket_id=p_ticket_id;
+    commit;
+return v_record_id;
+end;
+
+declare
+v_recored_id number;
+begin
+v_recored_id:=lazorenko_al.write_to_records(3,33);
+dbms_output.put_line(v_recored_id);
+end;
+
+--ФУНКЦИЯ ПРОВЕРКИ УСЛОВИЙ ПЕРЕД ЗАПИСЬЮ
+
+create or replace function lazorenko_al.check_for_accept(p_ticket_id in number, out_messages out varchar2
+)
+return boolean
+as
+    v_result boolean := true;
+begin
+    if (not lazorenko_al.ticket_check(
+        p_ticket_id => p_ticket_id
+    )) then v_result:=false;
+    out_messages:=out_messages||chr(10)
+    ||'пациент уже записан на этот талон';
+end if;
+    return v_result;
+    end;
+
+    declare
+   v_result number;
+   v_messages varchar2(100);
+begin
+    v_result :=sys.diutil.bool_to_int(lazorenko_al.check_for_accept(33, v_messages));
+    DBMS_OUTPUT.PUT_LINE(v_messages);
+end;
+
+--ФУНКЦИЯ ЗАПИСИ С ПРОВЕРКОЙ УСЛОВИЯ
+create or replace function lazorenko_al.accept_record_by_rules(
+v_ticket_id number,
+v_patient_id number,
+v_messages in out varchar2,
+v_result out number
+) return  lazorenko_al.records.record_id%type as
+v_record_id lazorenko_al.records.record_id%type;
+begin
+ if (lazorenko_al.check_for_accept(
+            p_ticket_id => v_ticket_id, out_messages => v_messages))
+ then v_record_id:=lazorenko_al.write_to_records(p_patient_id => v_patient_id, p_ticket_id => v_ticket_id);
+ dbms_output.put_line(v_record_id ||' - '||'запись осуществлена успешно');
+ else v_result:=sys.diutil.bool_to_int(lazorenko_al.check_for_accept(v_ticket_id, v_messages));
+ DBMS_OUTPUT.PUT_LINE(v_messages);
+end if;
+return v_result;
+end;
+
+--ПРИМЕНЕНИЕ МЕТОДА ЗАПИСИ
+    declare
+   v_messages varchar2(100);
+   v_result number;
+begin
+    v_result:=lazorenko_al.accept_record_by_rules(33, 1, v_messages, v_result);
+end;
