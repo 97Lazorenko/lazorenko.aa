@@ -3,7 +3,7 @@
 -----------------------------------------------------------------------------------------------------------------------
 
 --ЗАПРОС 1 - ФУНКЦИЯ
-create function lazorenko_al.get_cities_regions(p_region_id in number)
+create or replace function lazorenko_al.get_cities_regions(p_region_id in number default null)
 return sys_refcursor
 as
 v_cursor_1 sys_refcursor;
@@ -20,7 +20,7 @@ declare
     v_city_region record1;
     v_cursor_1 sys_refcursor;
 begin
-    v_cursor_1 :=lazorenko_al.get_cities_regions(null);
+    v_cursor_1 :=lazorenko_al.get_cities_regions();
     loop
     FETCH v_cursor_1 INTO v_city_region;
     exit when v_cursor_1%notfound;
@@ -46,7 +46,7 @@ declare
     type record1 is record (cname varchar2(100), rname varchar2(100));
     v_city_region record1;
 begin
-    lazorenko_al.get_get_cities_regions(2,v_cursor);
+    lazorenko_al.get_get_cities_regions(2, v_cursor);
     loop
         fetch v_cursor into v_city_region;
         exit when v_cursor%notfound;
@@ -57,7 +57,7 @@ end;
 
 --ЗАПРОС 2 - ФУНКЦИЯ
 
-create function lazorenko_al.get_specs(p_hospital_id in number)
+create or replace function lazorenko_al.get_specs(p_hospital_id in number default null)
 return sys_refcursor
 as
 v_cursor_1 sys_refcursor;
@@ -77,7 +77,7 @@ declare
     v_spec_name record2;
     v_cursor_1 sys_refcursor;
 begin
-    v_cursor_1 :=lazorenko_al.get_specs(6);
+    v_cursor_1 :=lazorenko_al.get_specs();
     loop
     FETCH v_cursor_1 INTO v_spec_name;
     exit when v_cursor_1%notfound;
@@ -122,19 +122,24 @@ create or replace procedure lazorenko_al.get_doctors_specs(p_spec_id in number,
 as
 begin
     open out_cursor for
- select h.name, a.name, count(doctor_id) as количество_врачей, o.name,
+ select h.name, a.name, count(d.doctor_id) as количество_врачей,
+case
+    when o.ownership_type_id=1 then 'частная'
+    when o.ownership_type_id=2 then 'государственная'
+end as форма_собственности,
 case
     when w.end_time is null then ' - '
     else w.end_time
 end as закрытие
-from hospital h left join work_time w using(hospital_id)
-    inner join ownership_type o using(ownership_type_id)
-    inner join doctor using(hospital_id) inner join doctor_spec using(doctor_id)
-    inner join available a using(availability_id)
+from hospital h left join work_time w on h.hospital_id=w.hospital_id
+    inner join ownership_type o on h.ownership_type_id=o.ownership_type_id
+    inner join doctor d on d.hospital_id=h.hospital_id
+    inner join doctor_spec ds on d.doctor_id=ds.doctor_id
+    inner join available a on h.availability_id=a.availability_id
 where (spec_id=p_spec_id or p_spec_id is null) and h.delete_from_the_sys is null and w.day=to_char(sysdate, 'd')
-group by h.name, a.name, o.name, w.end_time
+group by h.name, a.name, o.ownership_type_id, w.end_time
 order by case
-    when o.name='частная' then 1
+    when o.ownership_type_id=1 then 1
     else 0 end desc, количество_врачей desc, case
     when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
     else 0
@@ -159,7 +164,7 @@ end;
 
 --ЗАПРОС 4 - ФУНКЦИЯ
 
-create function lazorenko_al.get_doctor(p_hospital_id in number, p_zone_id in number)
+create or replace function lazorenko_al.get_doctor(p_hospital_id in number, p_zone_id in number)
 return sys_refcursor
 as
 v_cursor_1 sys_refcursor;
@@ -223,7 +228,7 @@ end;
 
 --ЗАПРОС 6 - ФУНКЦИЯ
 
-create function lazorenko_al.get_documents(p_document_id in number)
+create or replace function lazorenko_al.get_documents(p_document_id in number default null)
 return sys_refcursor
 as
 v_cursor_1 sys_refcursor;
@@ -247,7 +252,7 @@ declare
     v_patient record6;
     v_cursor_1 sys_refcursor;
 begin
-    v_cursor_1 :=lazorenko_al.get_documents(2);
+    v_cursor_1 :=lazorenko_al.get_documents();
     loop
     FETCH v_cursor_1 INTO v_patient;
     exit when v_cursor_1%notfound;
@@ -304,7 +309,7 @@ begin
 end;
 
 --ЗАПРОС 8 - ФУНКЦИЯ
-create function lazorenko_al.get_records(p_patient_id in number, p_record_stat_id in number)
+create or replace function lazorenko_al.get_records(p_patient_id in number default null, p_record_stat_id in number default null)
 return sys_refcursor
 as
 v_cursor_1 sys_refcursor;
@@ -324,7 +329,7 @@ type record8 is record(last_name varchar2(100), first_name varchar2(100),
     v_patient record8;
     v_cursor_1 sys_refcursor;
 begin
-    v_cursor_1 :=lazorenko_al.get_records(2, null);
+    v_cursor_1 :=lazorenko_al.get_records();
     loop
     FETCH v_cursor_1 INTO v_patient;
     exit when v_cursor_1%notfound;
@@ -334,363 +339,3 @@ begin
     end loop;
     close v_cursor_1;
 end;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

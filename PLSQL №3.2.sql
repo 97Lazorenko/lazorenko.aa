@@ -2,246 +2,281 @@
 -----------------------------------------------ЗАДАНИЕ №2---------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 
---ПРОВЕРКА ВОЗРАСТА
+--НОВЫЙ ВАРИАНТ
+--ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ДАННЫЕ ПАЦИЕНТА
+create or replace function lazorenko_al.get_patient_info_by_id(
+    p_patient_id number
+)
+return lazorenko_al.patient%rowtype
+as
+    v_patient lazorenko_al.patient%rowtype;
+begin
+    select *
+    into v_patient
+    from lazorenko_al.patient p
+    where p.patient_id = p_patient_id;
 
-create or replace function lazorenko_al.check_age(p_patient_id in number, p_doctor_id in number)
+    return v_patient;
+end;
+
+--ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - РАСЧЁТ ВОЗРАСТА
+create or replace function lazorenko_al.calculate_age_from_date(
+    p_date date
+)
 return number
 as
-v_valid_patient_age number;
+    v_age number;
 begin
-select case
-     when l.age_group_id=ags.age_group_id and p_doctor_id=d.doctor_id then 1
-     else 0
-     end as valid_age
-into v_valid_patient_age
-from (select case
-when (sysdate-p.born_date)/365 between 0 and 2 then 1
-when (sysdate-p.born_date)/365 between 3 and 17 then 2
-when (sysdate-p.born_date)/365 between 18 and 59 then 3
-when (sysdate-p.born_date)/365 between 60 and 100 then 4
-else 0 end as age_group_id
-from lazorenko_al.patient p where p.patient_id=p_patient_id) l
-left join lazorenko_al.age_spec ags on l.age_group_id=ags.age_group_id
-inner join lazorenko_al.specialisation s on s.spec_id=ags.spec_id
-inner join lazorenko_al.doctor_spec ds on s.spec_id=ds.spec_id
-inner join lazorenko_al.doctor d on ds.doctor_id=d.doctor_id
-where rownum=1
-order by valid_age desc;
-return v_valid_patient_age;
+    select months_between(sysdate, p_date)/12
+    into v_age
+    from dual;
+
+    return v_age;
+end;
+
+--ПРОВЕРКА ВОЗРАСТА
+create or replace function lazorenko_al.check_age(p_patient_id in number, p_spec_id in number)
+return boolean
+as
+v_patient lazorenko_al.patient%rowtype;
+v_age number;
+v_count number;
+begin
+v_patient:=lazorenko_al.get_patient_info_by_id(p_patient_id);
+v_age:=lazorenko_al.calculate_age_from_date(v_patient.born_date);
+select count(*)
+into v_count
+from lazorenko_al.specialisation s
+where s.spec_id = p_spec_id
+        and (s.min_age <= v_age or s.min_age is null)
+        and (s.max_age >= v_age or s.max_age is null);
+return v_count>0;
 end;
 
 declare
    v_valid_patient_age number;
 begin
-    v_valid_patient_age :=lazorenko_al.check_age(7, 3);
+    v_valid_patient_age :=sys.diutil.bool_to_int(lazorenko_al.check_age(2, 3));
     DBMS_OUTPUT.PUT_LINE( v_valid_patient_age);
+end;
+
+
+--ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ОПРЕДЕЛЕНИЕ ПОЛА ПАЦИЕНТА
+create or replace function lazorenko_al.sex_determine(
+    p_patient_id number
+)
+return number
+as
+    v_sex number;
+begin
+    select p.sex_id
+    into v_sex
+    from lazorenko_al.patient p
+    where p.patient_id=p_patient_id;
+
+    return v_sex;
 end;
 
 
 --ПРОВЕРКА ПОЛА
 
 create or replace function lazorenko_al.sex_check(p_patient_id in number, p_spec_id in number)
-return number as
-valid_sex number;
+return boolean
+as
+v_sex number;
+v_count number;
 begin
-    select
-       case when sx.sex_id is not null and s.spec_id=p_spec_id then 1
-       else 0
-       end as valid_sex
-    into valid_sex
-from (select sex_id from lazorenko_al.patient where patient_id=p_patient_id) p left join lazorenko_al.SEX_SPEC sx on p.sex_id=sx.sex_id
-right join lazorenko_al.specialisation s on s.spec_id=sx.spec_id
-where s.spec_id=p_spec_id
-order by valid_sex desc;
-    return valid_sex;
+v_sex:=lazorenko_al.sex_determine(p_patient_id);
+select count(*)
+into v_count
+from lazorenko_al.specialisation s
+where s.spec_id=p_spec_id and (s.sex_id=v_sex or s.sex_id is null);
+    return v_count>0;
 end;
 
 declare
-   valid_sex number;
+   v_valid_sex number;
 begin
-    valid_sex :=lazorenko_al.sex_check(7, 5);
-    DBMS_OUTPUT.PUT_LINE( valid_sex);
+    v_valid_sex :=sys.diutil.bool_to_int(lazorenko_al.sex_check(2, 2));
+    DBMS_OUTPUT.PUT_LINE( v_valid_sex);
+end;
+
+--ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ДАННЫЕ ТАЛОНА
+create or replace function lazorenko_al.get_ticket_info_by_id(
+    p_ticket_id number
+)
+return lazorenko_al.ticket%rowtype
+as
+    v_ticket lazorenko_al.ticket%rowtype;
+begin
+    select *
+    into v_ticket
+    from lazorenko_al.ticket t
+    where t.ticket_id = p_ticket_id;
+
+    return v_ticket;
+end;
+
+--ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ОПРЕДЕЛЕНИЕ СТАТУСА ТАЛОНА
+create or replace function lazorenko_al.ticket_status_determine(
+    p_ticket_id number
+)
+return number
+as
+    v_ticket_status number;
+begin
+    select t.ticket_stat_id
+    into v_ticket_status
+    from lazorenko_al.ticket t
+    where t.ticket_id=p_ticket_id;
+
+    return v_ticket_status;
 end;
 
 --ПРОВЕРКА СТАТУСА ТАЛОНА
 create or replace function lazorenko_al.ticket_status_check(p_ticket_id in number)
-return number as
-valid_ticket_status number;
+return boolean as
+    v_ticket_status number;
+    v_count number;
 begin
-    select
-           case
-               when t.ticket_stat_id=1 then 1
-               when t.ticket_stat_id=2 then 0
-           end
-    into valid_ticket_status
+    v_ticket_status:=lazorenko_al.ticket_status_determine(p_ticket_id);
+    select count(*)
+    into v_count
     from lazorenko_al.ticket t
-    where t.ticket_id=p_ticket_id;
-return valid_ticket_status;
+    where t.ticket_id=p_ticket_id and t.ticket_stat_id=1;
+return v_count>0;
 end;
 
 declare
-   valid_ticket_status number;
+   v_valid_ticket_stat number;
 begin
-    valid_ticket_status :=lazorenko_al.ticket_status_check(33);
-    DBMS_OUTPUT.PUT_LINE( valid_ticket_status);
+    v_valid_ticket_stat :=sys.diutil.bool_to_int(lazorenko_al.ticket_status_check(32));
+    DBMS_OUTPUT.PUT_LINE( v_valid_ticket_stat);
 end;
 
 --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
 create or replace function lazorenko_al.ticket_check(p_ticket_id in number)
-return number as
-valid_ticket number;
+return boolean as
+v_count number;
 begin
-    select
-           case
-               when r.ticket_id is null then 1
-               when t.ticket_id=r.ticket_id and r.record_stat_id=2 then 1
-               when r.ticket_id=t.ticket_id and r.record_stat_id in (1, 3) then 0
-           end
-    into valid_ticket
-    from lazorenko_al.ticket t left join lazorenko_al.records r on t.ticket_id=r.ticket_id
-    where t.ticket_id=p_ticket_id;
-return valid_ticket;
+    select count(*)
+    into v_count
+    from lazorenko_al.records r right join lazorenko_al.ticket t on r.ticket_id=t.ticket_id
+    where (r.ticket_id=p_ticket_id and r.record_stat_id=2)
+          or (t.ticket_id=p_ticket_id and r.ticket_id is null);
+return v_count>0;
 end;
 
 declare
-   valid_ticket number;
+   v_valid_ticket number;
 begin
-    valid_ticket :=lazorenko_al.ticket_check(33);
-    DBMS_OUTPUT.PUT_LINE( valid_ticket);
+    v_valid_ticket :=sys.diutil.bool_to_int(lazorenko_al.ticket_check(32));
+    DBMS_OUTPUT.PUT_LINE( v_valid_ticket);
 end;
+
+--ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ОПРЕДЕЛЕНИЕ ВРЕМЕНИ НАЧАЛА ТАЛОНА
+create or replace function lazorenko_al.appointment_beg_determine(
+    p_ticket_id number
+)
+return char
+as
+    v_appointment_beg varchar2(100);
+begin
+    select t.appointment_beg
+    into v_appointment_beg
+    from lazorenko_al.ticket t
+    where t.ticket_id=p_ticket_id;
+
+    return v_appointment_beg;
+end;
+drop function lazorenko_al.appointment_beg_determine;
 
 --ПРОВЕРКА ВРЕМЕНИ
 create or replace function lazorenko_al.time_check(p_ticket_id in number)
-return number as
-valid_time number;
+return boolean
+as
+v_appointment_beg varchar2(100);
+v_count number;
 begin
-    select case
-        when t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') then 1
-        when t.appointment_beg<to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss') then 0
-        end  as valid_time
-    into valid_time
+v_appointment_beg:=lazorenko_al.appointment_beg_determine(p_ticket_id);
+    select count(*)
+    into v_count
     from lazorenko_al.ticket t
-    where t.ticket_id=p_ticket_id;
-return valid_time;
+    where t.ticket_id=p_ticket_id and v_appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss');
+return v_count>0;
 end;
 
 declare
    valid_time number;
 begin
-    valid_time :=lazorenko_al.time_check(33);
+    valid_time :=sys.diutil.bool_to_int(lazorenko_al.time_check(33));
     DBMS_OUTPUT.PUT_LINE( valid_time);
 end;
 
---ПРОВЕРКА НА УДАЛЕНИЕ (БОЛЬНИЦА)
-create or replace function lazorenko_al.hospital_check(p_hospital_id in number)
-return number as
-valid_hospital_not_deleted number;
+--ПРОВЕРКА НА УДАЛЕНИЕ ВРАЧА, БОЛЬНИЦЫ, СПЕЦИАЛЬНОСТИ
+create or replace function lazorenko_al.not_deleted_check(p_doctor_id in number)
+return boolean as
+v_count number;
 begin
-    select case
-        when h.hospital_id=p_hospital_id and h.delete_from_the_sys is null then 1
-        when h.hospital_id=p_hospital_id and h.delete_from_the_sys is not null then 0
-        end
-    into valid_hospital_not_deleted
-    from lazorenko_al.hospital h
-    where h.hospital_id=p_hospital_id;
-return valid_hospital_not_deleted;
+    select count(*)
+    into v_count
+    from lazorenko_al.doctor d inner join lazorenko_al.hospital h on d.hospital_id=h.hospital_id
+    inner join lazorenko_al.doctor_spec ds on d.doctor_id=ds.doctor_id
+    inner join lazorenko_al.specialisation s on ds.spec_id=s.spec_id
+    where d.doctor_id=p_doctor_id and d.dismiss_date is null and h.delete_from_the_sys is null
+          and s.delete_from_the_sys is null;
+return v_count>0;
 end;
 
 declare
-   valid_hospital_not_deleted number;
+   valid_doctor_hospital_spec number;
 begin
-    valid_hospital_not_deleted :=lazorenko_al.hospital_check(11);
-    DBMS_OUTPUT.PUT_LINE( valid_hospital_not_deleted);
+    valid_doctor_hospital_spec :=sys.diutil.bool_to_int(lazorenko_al.not_deleted_check(3));
+    DBMS_OUTPUT.PUT_LINE( valid_doctor_hospital_spec);
 end;
 
---ПРОВЕРКА НА УДАЛЕНИЕ (ВРАЧ)
-create or replace function lazorenko_al.doctor_check(p_doctor_id in number)
-return number as
-valid_doctor_not_deleted number;
-begin
-    select case
-        when d.doctor_id=p_doctor_id and d.dismiss_date is null then 1
-        when d.doctor_id=p_doctor_id and d.dismiss_date is not null then 0
-        end
-    into valid_doctor_not_deleted
-    from lazorenko_al.doctor d
-    where d.doctor_id=p_doctor_id;
-return valid_doctor_not_deleted;
-end;
-
-declare
-   valid_doctor_not_deleted number;
-begin
-    valid_doctor_not_deleted :=lazorenko_al.doctor_check(31);
-    DBMS_OUTPUT.PUT_LINE( valid_doctor_not_deleted);
-end;
-
---ПРОВЕРКА НА УДАЛЕНИЕ (СПЕЦИАЛЬНОСТЬ)
-
-create or replace function lazorenko_al.spec_check(p_spec_id in number)
-return number as
-valid_spec_not_deleted number;
-begin
-    select case
-        when s.spec_id=p_spec_id and s.delete_from_the_sys is null then 1
-        when s.spec_id=p_spec_id and s.delete_from_the_sys is not null then 0
-        end
-    into valid_spec_not_deleted
-    from lazorenko_al.specialisation s
-    where s.spec_id=p_spec_id;
-return valid_spec_not_deleted;
-end;
-
-declare
-   valid_spec_not_deleted number;
-begin
-    valid_spec_not_deleted :=lazorenko_al.spec_check(2);
-    DBMS_OUTPUT.PUT_LINE( valid_spec_not_deleted);
-end;
 
 --ПРОВЕРКА НАЛИЧИЯ ПОЛИСА
 create or replace function lazorenko_al.patient_doc_check(p_patient_id in number)
-return number as
-valid_patient_doc number;
+return boolean as
+v_count number;
 begin
-    select case
-        when ds.patient_id=p_patient_id and ds.value is not null then 1
-        when ds.patient_id=p_patient_id and ds.value is null then 0
-        end
-    into valid_patient_doc
-    from lazorenko_al.documents_numbers ds
-    where ds.patient_id=p_patient_id and ds.document_id=4;
-return valid_patient_doc;
+    select count(*)
+    into v_count
+    from lazorenko_al.documents_numbers dn
+    where dn.patient_id=p_patient_id and dn.document_id=4
+          and dn.value is not null;
+return v_count>0;
 end;
 
 declare
-   valid_patient_doc number;
+   valid_docs number;
 begin
-    valid_patient_doc :=lazorenko_al.patient_doc_check(1);
-    DBMS_OUTPUT.PUT_LINE(valid_patient_doc);
+    valid_docs :=sys.diutil.bool_to_int(lazorenko_al.patient_doc_check(1));
+    DBMS_OUTPUT.PUT_LINE( valid_docs);
 end;
 
---ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА НА СООТВЕТСТВИЕ ВВОДИМЫХ БОЛЬНИЦ, ДОКТОРОВ, СПЕЦИАЛЬНОСТЕЙ И ТАЛОНОВ НА ЗАПИСЬ
+--ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА НА СООТВЕТСТВИЕ ВВОДИМЫХ БОЛЬНИЦ, ДОКТОРОВ, СПЕЦИАЛЬНОСТЕЙ И ТАЛОНОВ
 
 create or replace function lazorenko_al.check_IN_parameters(p_hospital_id in number, p_doctor_id in number,
 p_spec_id in number, p_ticket_id in number)
-return number as
-valid_IN_parameters number;
+return boolean as
+v_count number;
 begin
 select count(*)
-into valid_IN_parameters
+into v_count
 from lazorenko_al.hospital h inner join lazorenko_al.doctor d on h.hospital_id=d.hospital_id
 inner join lazorenko_al.doctor_spec ds on d.doctor_id=ds.doctor_id
 inner join lazorenko_al.specialisation s on ds.spec_id=s.spec_id
 inner join lazorenko_al.ticket t on d.doctor_id=t.doctor_id
 where h.hospital_id=p_hospital_id and d.doctor_id=p_doctor_id and s.spec_id=p_spec_id
 and t.ticket_id=p_ticket_id;
-return valid_IN_parameters;
+return v_count>0;
 end;
 
 declare
-   valid_IN_parameters number;
+   valid_parameters number;
 begin
-    valid_IN_parameters :=lazorenko_al.check_IN_parameters(5,3,2,33);
-    DBMS_OUTPUT.PUT_LINE(valid_IN_parameters);
+    valid_parameters :=sys.diutil.bool_to_int(lazorenko_al.check_IN_parameters(4, 3, 2, 33));
+    DBMS_OUTPUT.PUT_LINE( valid_parameters);
 end;
