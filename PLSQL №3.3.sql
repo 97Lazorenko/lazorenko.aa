@@ -126,17 +126,25 @@ end;
 
 --ФУНКЦИЯ ПРОВЕРКИ УСЛОВИЙ ПЕРЕД ЗАПИСЬЮ
 
-create or replace function lazorenko_al.check_for_accept(p_ticket_id in number, out_messages out varchar2
+create or replace function lazorenko_al.check_for_accept(p_ticket_id in number, p_patient_id in number, out_messages out varchar2
 )
 return boolean
 as
     v_result boolean := true;
 begin
     if (not lazorenko_al.ticket_check(
-        p_ticket_id => p_ticket_id
+        p_ticket_id => p_ticket_id,
+        p_patient_id => p_patient_id
     )) then v_result:=false;
     out_messages:=out_messages||chr(10)
     ||'пациент уже записан на этот талон';
+    end if;
+    if (not lazorenko_al.ticket_status_check(
+        p_ticket_id => p_ticket_id,
+        p_patient_id => p_patient_id
+    )) then v_result:=false;
+    out_messages:=out_messages||chr(10)
+    ||'талон занят';
 end if;
     return v_result;
     end;
@@ -145,7 +153,7 @@ end if;
    v_result number;
    v_messages varchar2(100);
 begin
-    v_result :=sys.diutil.bool_to_int(lazorenko_al.check_for_accept(33, v_messages));
+    v_result :=sys.diutil.bool_to_int(lazorenko_al.check_for_accept(33, 2, v_messages));
     DBMS_OUTPUT.PUT_LINE(v_messages);
 end;
 
@@ -159,10 +167,10 @@ v_result out number
 v_record_id lazorenko_al.records.record_id%type;
 begin
  if (lazorenko_al.check_for_accept(
-            p_ticket_id => v_ticket_id, out_messages => v_messages))
+            p_ticket_id => v_ticket_id, p_patient_id => v_patient_id, out_messages => v_messages))
  then v_record_id:=lazorenko_al.write_to_records(p_patient_id => v_patient_id, p_ticket_id => v_ticket_id);
  dbms_output.put_line(v_record_id ||' - '||'запись осуществлена успешно');
- else v_result:=sys.diutil.bool_to_int(lazorenko_al.check_for_accept(v_ticket_id, v_messages));
+ else v_result:=sys.diutil.bool_to_int(lazorenko_al.check_for_accept(v_ticket_id, v_patient_id, v_messages));
  DBMS_OUTPUT.PUT_LINE(v_messages);
 end if;
 return v_result;

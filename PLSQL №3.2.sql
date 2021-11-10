@@ -134,7 +134,7 @@ begin
 end;
 
 --ПРОВЕРКА СТАТУСА ТАЛОНА
-create or replace function lazorenko_al.ticket_status_check(p_ticket_id in number)
+create or replace function lazorenko_al.ticket_status_check(p_ticket_id in number, p_patient_id number)
 return boolean as
     v_ticket_status number;
     v_count number;
@@ -142,35 +142,37 @@ begin
     v_ticket_status:=lazorenko_al.ticket_status_determine(p_ticket_id);
     select count(*)
     into v_count
-    from lazorenko_al.ticket t
-    where t.ticket_id=p_ticket_id and t.ticket_stat_id=1;
+    from lazorenko_al.ticket t left join lazorenko_al.records r on r.ticket_id=t.ticket_id
+    where (t.ticket_id=p_ticket_id and t.ticket_stat_id=1)
+          or (t.ticket_id=p_ticket_id and t.ticket_stat_id=2 and r.patient_id=p_patient_id);
 return v_count>0;
 end;
 
 declare
    v_valid_ticket_stat number;
 begin
-    v_valid_ticket_stat :=sys.diutil.bool_to_int(lazorenko_al.ticket_status_check(32));
+    v_valid_ticket_stat :=sys.diutil.bool_to_int(lazorenko_al.ticket_status_check(33, 1));
     DBMS_OUTPUT.PUT_LINE( v_valid_ticket_stat);
 end;
 
 --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
-create or replace function lazorenko_al.ticket_check(p_ticket_id in number)
+create or replace function lazorenko_al.ticket_check(p_ticket_id in number, p_patient_id number)
 return boolean as
 v_count number;
 begin
     select count(*)
     into v_count
     from lazorenko_al.records r right join lazorenko_al.ticket t on r.ticket_id=t.ticket_id
-    where (r.ticket_id=p_ticket_id and r.record_stat_id=2)
-          or (t.ticket_id=p_ticket_id and r.ticket_id is null);
+    where (r.ticket_id=p_ticket_id and r.record_stat_id=2 and (r.patient_id=p_patient_id or r.patient_id<>p_patient_id))
+          or (r.ticket_id=p_ticket_id and r.record_stat_id=1 and r.patient_id<>p_patient_id)
+          or (t.ticket_id=p_ticket_id and r.ticket_id is null and r.patient_id is null);
 return v_count>0;
 end;
 
 declare
    v_valid_ticket number;
 begin
-    v_valid_ticket :=sys.diutil.bool_to_int(lazorenko_al.ticket_check(32));
+    v_valid_ticket :=sys.diutil.bool_to_int(lazorenko_al.ticket_check(33, 1));
     DBMS_OUTPUT.PUT_LINE( v_valid_ticket);
 end;
 
