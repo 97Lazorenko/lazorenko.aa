@@ -26,7 +26,7 @@ begin
     loop
     FETCH v_cursor_1 INTO v_city_region;
     exit when v_cursor_1%notfound;
-    DBMS_OUTPUT.PUT_LINE( v_city_region.cname ||' - '|| v_city_region.rname);
+    dbms_output.put_line( v_city_region.cname ||' - '|| v_city_region.rname);
     end loop;
     close v_cursor_1;
 end;
@@ -85,7 +85,7 @@ begin
     loop
     FETCH v_cursor_1 INTO v_spec_name;
     exit when v_cursor_1%notfound;
-    DBMS_OUTPUT.PUT_LINE( v_spec_name.spec_name);
+    dbms_output.put_line( v_spec_name.spec_name);
     end loop;
     close v_cursor_1;
 end;
@@ -209,7 +209,7 @@ begin
     loop
     FETCH v_cursor_1 INTO v_doctor;
     exit when v_cursor_1%notfound;
-    DBMS_OUTPUT.PUT_LINE( 'ФИО врача - ' || v_doctor.dname ||'; специальность - '||
+    dbms_output.put_line( 'ФИО врача - ' || v_doctor.dname ||'; специальность - '||
                           v_doctor.spname || '; квалификация - ' || v_doctor.qualification);
     end loop;
     close v_cursor_1;
@@ -277,7 +277,7 @@ begin
     loop
     FETCH v_cursor_1 INTO v_patient;
     exit when v_cursor_1%notfound;
-    DBMS_OUTPUT.PUT_LINE( 'ФИ(О) пациента - ' ||v_patient.last_name ||' '|| v_patient.first_name
+    dbms_output.put_line( 'ФИ(О) пациента - ' ||v_patient.last_name ||' '|| v_patient.first_name
                          || ' ' || v_patient.petronymic || '; документ - ' || v_patient.name || '; значение - ' || v_patient.value);
     end loop;
     close v_cursor_1;
@@ -361,7 +361,7 @@ begin
     loop
     FETCH v_cursor_1 INTO v_patient;
     exit when v_cursor_1%notfound;
-    DBMS_OUTPUT.PUT_LINE( 'пациент - '|| v_patient.last_name ||' '|| v_patient.first_name || ' ' || v_patient.petronymic
+    dbms_output.put_line( 'пациент - '|| v_patient.last_name ||' '|| v_patient.first_name || ' ' || v_patient.petronymic
     || '; врач - ' || v_patient.dname || '; статус записи - ' || v_patient.rec_stat || '; начало приёма - '
     || v_patient.appointment_beg || '; конец приёма - ' || v_patient.appointment_end);
     end loop;
