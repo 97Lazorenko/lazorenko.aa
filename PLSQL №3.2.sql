@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------------------------------------------------
------------------------------------------------ЗАДАНИЕ №2---------------------------------------------------------------
+-----------------------------------------------ФУНКЦИИ ПРОВЕРКИ УСЛОВИЙ (ДЛЯ ЗАПИСИ)------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 
 --ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ДАННЫЕ ПАЦИЕНТА
@@ -55,6 +55,8 @@ v_age:=lazorenko_al.calculate_age_from_date(v_patient.born_date);
 return v_count>0;
 end;
 
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
     v_valid_patient_age number;
 begin
@@ -99,6 +101,8 @@ v_sex:=lazorenko_al.sex_determine(p_patient_id);
 return v_count>0;
 end;
 
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
     v_valid_sex number;
 begin
@@ -106,39 +110,8 @@ begin
     dbms_output.put_line( v_valid_sex);
 end;
 
---ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ДАННЫЕ ТАЛОНА
-create or replace function lazorenko_al.get_ticket_info_by_id(
-    p_ticket_id number
-)
-return lazorenko_al.ticket%rowtype
-as
-    v_ticket lazorenko_al.ticket%rowtype;
-begin
-    select *
-    into v_ticket
-    from lazorenko_al.ticket t
-    where t.ticket_id = p_ticket_id;
-
-    return v_ticket;
-end;
-
---ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ОПРЕДЕЛЕНИЕ СТАТУСА ТАЛОНА
-create or replace function lazorenko_al.ticket_status_determine(
-    p_ticket_id number
-)
-return number
-as
-    v_ticket_status number;
-begin
-    select t.ticket_stat_id
-    into v_ticket_status
-    from lazorenko_al.ticket t
-    where t.ticket_id=p_ticket_id;
-
-return v_ticket_status;
-end;
-
 --ПРОВЕРКА СТАТУСА ТАЛОНА
+
 create or replace function lazorenko_al.ticket_status_check(
     p_ticket_id in number,
     p_patient_id number)
@@ -154,6 +127,8 @@ begin
 return v_count>0;
 end;
 
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
     v_valid_ticket_stat number;
 begin
@@ -162,6 +137,7 @@ begin
 end;
 
 --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
+
 create or replace function lazorenko_al.ticket_check(
     p_ticket_id in number,
     p_patient_id number)
@@ -179,6 +155,8 @@ begin
 return v_count>0;
 end;
 
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
     v_valid_ticket number;
 begin
@@ -186,24 +164,8 @@ begin
     dbms_output.put_line( v_valid_ticket);
 end;
 
---ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ - ОПРЕДЕЛЕНИЕ ВРЕМЕНИ НАЧАЛА ТАЛОНА
-create or replace function lazorenko_al.appointment_beg_determine(
-    p_ticket_id number
-)
-return char
-as
-    v_appointment_beg varchar2(100);
-begin
-    select t.appointment_beg
-    into v_appointment_beg
-    from lazorenko_al.ticket t
-    where t.ticket_id=p_ticket_id;
-
-    return v_appointment_beg;
-end;
-drop function lazorenko_al.appointment_beg_determine;
-
 --ПРОВЕРКА ВРЕМЕНИ
+
 create or replace function lazorenko_al.time_check(
     p_ticket_id in number)
 return boolean
@@ -219,6 +181,8 @@ v_appointment_beg:=lazorenko_al.appointment_beg_determine(p_ticket_id);
 return v_count>0;
 end;
 
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
     valid_time number;
 begin
@@ -227,6 +191,7 @@ begin
 end;
 
 --ПРОВЕРКА НА УДАЛЕНИЕ ВРАЧА, БОЛЬНИЦЫ, СПЕЦИАЛЬНОСТИ
+
 create or replace function lazorenko_al.not_deleted_check(
     p_doctor_id in number)
 return boolean as
@@ -245,6 +210,8 @@ begin
 return v_count>0;
 end;
 
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
     valid_doctor_hospital_spec number;
 begin
@@ -254,6 +221,7 @@ end;
 
 
 --ПРОВЕРКА НАЛИЧИЯ ПОЛИСА
+
 create or replace function lazorenko_al.patient_doc_check(
     p_patient_id in number)
 return boolean as
@@ -267,6 +235,8 @@ begin
 
 return v_count>0;
 end;
+
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
 
 declare
     valid_docs number;
@@ -298,6 +268,8 @@ begin
 
 return v_count>0;
 end;
+
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
 
 declare
     valid_parameters number;
