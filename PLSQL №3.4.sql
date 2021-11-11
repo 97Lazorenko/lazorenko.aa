@@ -18,6 +18,7 @@ return v_count>0;
 end;
 
 --ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
    valid_time_for_cancel number;
 begin
@@ -26,6 +27,7 @@ begin
 end;
 
 --ФУНКЦИЯ ПРОВЕРКИ ВРЕМЕНИ ПРИЁМА
+
 create or replace function lazorenko_al.ticket_time_check(
 p_ticket_id in number)
 return boolean as
@@ -39,7 +41,8 @@ begin
 return v_count>0;
 end;
 
-    --ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
    valid_time_for_cancel number;
 begin
@@ -48,6 +51,7 @@ begin
 end;
 
 --ФУНКЦИЯ ПРОВЕРКИ ВВОДИМЫХ ПРИ ЗАПИСИ ПАРАМЕТРОВ
+
 create or replace function lazorenko_al.check_IN_parameters2(
 p_patient_id in number,
 p_ticket_id in number)
@@ -62,6 +66,7 @@ return v_count>0;
 end;
 
 --ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
    valid_IN_parameters2 number;
 begin
@@ -69,7 +74,10 @@ begin
     dbms_output.put_line( valid_IN_parameters2);
 end;
 
+------------------------------------------------------------------------------------------------------------------------
+
 --ФУНКЦИЯ ПРОВЕРКИ УСЛОВИЙ ПЕРЕД ОТМЕНОЙ
+
 create or replace function lazorenko_al.check_for_cancel(
 p_hospital_id in number,
 p_ticket_id in number,
@@ -104,6 +112,8 @@ begin
 return v_result;
 end;
 
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
    v_result number;
    v_messages varchar2(500);
@@ -113,7 +123,10 @@ begin
     dbms_output.put_line(v_messages);
 end;
 
+------------------------------------------------------------------------------------------------------------------------
+
 --ФУНКЦИЯ ОТМЕНЫ ЗАПИСИ
+
 create or replace function lazorenko_al.cancel_record(p_ticket_id in number)
 return  lazorenko_al.records.record_id%type as
 v_record_id lazorenko_al.records.record_id%type;
@@ -125,6 +138,8 @@ begin
 return v_record_id;
 end;
 
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+
 declare
    v_record_id number;
 begin
@@ -132,7 +147,10 @@ begin
    dbms_output.put_line(v_record_id);
 end;
 
+------------------------------------------------------------------------------------------------------------------------
+
 --ОТМЕНА ЗАПИСИ ПО УСЛОВИЯМ
+
 create or replace function lazorenko_al.cancel_record_by_rules(
 v_ticket_id number,
 v_patient_id number,
@@ -159,6 +177,9 @@ begin
 end if;
 return v_result;
 end;
+
+
+--ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
 
 declare
    v_messages varchar2(500);
