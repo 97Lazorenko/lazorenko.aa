@@ -93,7 +93,7 @@ begin
     p_ticket_id => p_ticket_id
     )) then v_result:=false;
     out_messages:=out_messages||chr(10)
-    ||'действующий талон с подобными параметрами отсутствует или закрыт';
+    ||'у вас отсутствует действующий талон с подобными параметрами или талон закрыт';
     end if;
 
     if (not lazorenko_al.ticket_time_check(
@@ -128,12 +128,11 @@ end;
 --ФУНКЦИЯ ОТМЕНЫ ЗАПИСИ
 
 create or replace function lazorenko_al.cancel_record(p_ticket_id in number)
-return  lazorenko_al.records.record_id%type as
-v_record_id lazorenko_al.records.record_id%type;
+return  number  as
+v_record_id number;
 begin
      update lazorenko_al.ticket t set t.ticket_stat_id=1 where t.ticket_id=p_ticket_id;
-     update lazorenko_al.records r set r.record_stat_id=2 where r.ticket_id=p_ticket_id
-     returning ticket_id into v_record_id;
+     update lazorenko_al.records r set r.record_stat_id=2 where r.ticket_id=p_ticket_id;
      commit;
 return v_record_id;
 end;
@@ -143,7 +142,7 @@ end;
 declare
    v_record_id number;
 begin
-   v_record_id:=lazorenko_al.cancel_record(30);
+   v_record_id:=lazorenko_al.cancel_record(33);
    dbms_output.put_line(v_record_id);
 end;
 
@@ -179,13 +178,13 @@ return v_result;
 end;
 
 
---ТЕСТИРОВАНИЕ ЕЁ РАБОТОСПОСОБНОСТИ
+--ПРИМЕНЕНИЕ МЕТОДА ОТМЕНЫ ЗАПИСИ
 
 declare
    v_messages varchar2(500);
    v_result number;
 begin
     v_result:=lazorenko_al.cancel_record_by_rules(
-    30, 1, 4,
+    33, 1, 4,
     v_messages, v_result);
 end;

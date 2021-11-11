@@ -153,6 +153,6 @@ declare
    v_result number;
 begin
     v_result:=lazorenko_al.accept_record_by_rules(
-    27, 2, 6, 31, 5, false,
+    33, 1, 2, 3, 4, false,
     v_messages, v_result);
 end;
