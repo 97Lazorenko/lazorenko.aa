@@ -3,15 +3,17 @@
 -----------------------------------------------------------------------------------------------------------------------
 
 --ЗАПРОС 1 - ФУНКЦИЯ
-create or replace function lazorenko_al.get_cities_regions(p_region_id in number default null)
+create or replace function lazorenko_al.get_cities_regions(
+p_region_id in number default null)
 return sys_refcursor
 as
-v_cursor_1 sys_refcursor;
+    v_cursor_1 sys_refcursor;
 begin
 open v_cursor_1 for
     select c.name, r.name
     from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
     where p_region_id=region_id or p_region_id is null;
+
 return v_cursor_1;
 end;
 
@@ -30,9 +32,9 @@ begin
 end;
 
 --ЗАПРОС 1 - ПРОЦЕДУРА
-create or replace procedure lazorenko_al.get_get_cities_regions(p_region_id in number,
-    out_cursor out sys_refcursor
-)
+create or replace procedure lazorenko_al.get_get_cities_regions(
+    p_region_id in number,
+    out_cursor out sys_refcursor)
 as
 begin
     open out_cursor for
@@ -58,17 +60,19 @@ end;
 --ЗАПРОС 2 - ФУНКЦИЯ
 
 create or replace function lazorenko_al.get_specs(p_hospital_id in number default null)
-return sys_refcursor
-as
-v_cursor_1 sys_refcursor;
+return sys_refcursor as
+    v_cursor_1 sys_refcursor;
 begin
 open v_cursor_1 for
-   select distinct s.name
-from specialisation s inner join doctor_spec using(spec_id)
+    select distinct s.name
+
+    from specialisation s inner join doctor_spec using(spec_id)
     inner join doctor d using(doctor_id)
     inner join hospital h using(hospital_id)
-where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null
-      and (p_hospital_id=hospital_id or p_hospital_id is null);
+
+    where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null
+          and (p_hospital_id=hospital_id or p_hospital_id is null);
+
 return v_cursor_1;
 end;
 
@@ -87,18 +91,20 @@ begin
 end;
 
 --ЗАПРОС 2 - ПРОЦЕДУРА
-create or replace procedure lazorenko_al.get_get_specs(p_hospital_id in number,
-    out_cursor out sys_refcursor
-)
+create or replace procedure lazorenko_al.get_get_specs(
+    p_hospital_id in number,
+    out_cursor out sys_refcursor)
 as
 begin
-    open out_cursor for
- select distinct s.name
-from specialisation s inner join doctor_spec using(spec_id)
+open out_cursor for
+    select distinct s.name
+
+    from specialisation s inner join doctor_spec using(spec_id)
     inner join doctor d using(doctor_id)
     inner join hospital h using(hospital_id)
-where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null
-      and (p_hospital_id=hospital_id or p_hospital_id is null);
+
+    where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null
+          and (p_hospital_id=hospital_id or p_hospital_id is null);
 end;
 
 declare
@@ -116,34 +122,39 @@ begin
 end;
 
 --ЗАПРОС 3 - ПРОЦЕДУРА
-create or replace procedure lazorenko_al.get_doctors_specs(p_spec_id in number,
-    out_cursor out sys_refcursor
-)
+create or replace procedure lazorenko_al.get_doctors_specs(
+    p_spec_id in number,
+    out_cursor out sys_refcursor)
 as
 begin
-    open out_cursor for
- select h.name, a.name, count(d.doctor_id) as количество_врачей,
-case
-    when o.ownership_type_id=1 then 'частная'
-    when o.ownership_type_id=2 then 'государственная'
-end as форма_собственности,
-case
-    when w.end_time is null then ' - '
-    else w.end_time
-end as закрытие
-from hospital h left join work_time w on h.hospital_id=w.hospital_id
+open out_cursor for
+    select h.name, a.name, count(d.doctor_id) as количество_врачей,
+    case
+        when o.ownership_type_id=1 then 'частная'
+        when o.ownership_type_id=2 then 'государственная'
+        end as форма_собственности,
+    case
+        when w.end_time is null then ' - '
+        else w.end_time
+        end as закрытие
+
+    from hospital h left join work_time w on h.hospital_id=w.hospital_id
     inner join ownership_type o on h.ownership_type_id=o.ownership_type_id
     inner join doctor d on d.hospital_id=h.hospital_id
     inner join doctor_spec ds on d.doctor_id=ds.doctor_id
     inner join available a on h.availability_id=a.availability_id
-where (spec_id=p_spec_id or p_spec_id is null) and h.delete_from_the_sys is null and w.day=to_char(sysdate, 'd')
-group by h.name, a.name, o.ownership_type_id, w.end_time
-order by case
-    when o.ownership_type_id=1 then 1
-    else 0 end desc, количество_врачей desc, case
-    when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
-    else 0
-end desc;
+
+    where (spec_id=p_spec_id or p_spec_id is null) and h.delete_from_the_sys is null
+           and w.day=to_char(sysdate, 'd')
+
+    group by h.name, a.name, o.ownership_type_id, w.end_time
+    order by case
+             when o.ownership_type_id=1 then 1
+             else 0 end desc, количество_врачей desc,
+             case
+             when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
+             else 0
+             end desc;
 end;
 
 declare
@@ -164,22 +175,28 @@ end;
 
 --ЗАПРОС 4 - ФУНКЦИЯ
 
-create or replace function lazorenko_al.get_doctor(p_hospital_id in number, p_zone_id in number)
+create or replace function lazorenko_al.get_doctor(
+    p_hospital_id in number,
+    p_zone_id in number)
 return sys_refcursor
 as
-v_cursor_1 sys_refcursor;
+    v_cursor_1 sys_refcursor;
 begin
 open v_cursor_1 for
-select d.name, s.name, di.qualification
-from doctor d inner join doctor_spec using(doctor_id)
+    select d.name, s.name, di.qualification
+
+    from doctor d inner join doctor_spec using(doctor_id)
     inner join specialisation s using(spec_id)
     inner join doctors_info di using(doctor_id)
     inner join hospital using(hospital_id)
-where (hospital_id=p_hospital_id or p_hospital_id is null) and d.dismiss_date is null
-order by di.qualification desc,
-     case
-     when d.zone_id=p_zone_id then 1
-     else 0 end desc;
+
+    where (hospital_id=p_hospital_id or p_hospital_id is null) and d.dismiss_date is null
+
+    order by di.qualification desc,
+             case
+             when d.zone_id=p_zone_id then 1
+             else 0 end desc;
+
 return v_cursor_1;
 end;
 
@@ -199,12 +216,12 @@ begin
 end;
 
 --ЗАПРОС 5 - ПРОЦЕДУРА
-create or replace procedure lazorenko_al.get_ticket(v_doctor_id in number,
-    out_cursor out sys_refcursor
-)
+create or replace procedure lazorenko_al.get_ticket(
+    v_doctor_id in number,
+    out_cursor out sys_refcursor)
 as
 begin
-    open out_cursor for
+open out_cursor for
     select t.ticket_id, d.name, t.appointment_beg, t.appointment_end
     from ticket t right join doctor d using(doctor_id)
     where (doctor_id=v_doctor_id or v_doctor_id is null) and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
@@ -228,21 +245,25 @@ end;
 
 --ЗАПРОС 6 - ФУНКЦИЯ
 
-create or replace function lazorenko_al.get_documents(p_document_id in number default null)
+create or replace function lazorenko_al.get_documents(
+    p_document_id in number default null)
 return sys_refcursor
 as
-v_cursor_1 sys_refcursor;
+    v_cursor_1 sys_refcursor;
 begin
 open v_cursor_1 for
-select p.last_name, p.first_name, p.petronymic, d.name,
+    select p.last_name, p.first_name, p.petronymic, d.name,
     case
-    when dn.value is null then 'не указано'
-    else dn.value
-end as документ
-from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(patient_id)
+           when dn.value is null then 'не указано'
+           else dn.value
+           end as документ
+
+    from lazorenko_al.patient p inner join lazorenko_al.documents_numbers dn using(patient_id)
     right join lazorenko_al.documents d using(document_id)
+
     where document_id=p_document_id or p_document_id is null
     order by p.last_name;
+
 return v_cursor_1;
 end;
 
@@ -263,33 +284,36 @@ begin
 end;
 
 --ЗАПРОС 7 - ПРОЦЕДУРА
-create or replace procedure lazorenko_al.get_worktime(p_hospital_id in number,
-    out_cursor out sys_refcursor
-)
+create or replace procedure lazorenko_al.get_worktime(
+    p_hospital_id in number,
+    out_cursor out sys_refcursor)
 as
 begin
-    open out_cursor for
-select h.name,
-case w.day
-    when 1 then 'понедельник'
-    when 2 then 'вторник    '
-    when 3 then 'среда      '
-    when 4 then 'четверг    '
-    when 5 then 'пятница    '
-    when 6 then 'суббота    '
-    when 7 then 'воскресенье'
-end as день_недели,
-case
-    when w.begin_time is null then 'не указано'
-    else w.begin_time
-end as время_открытия,
-case
-    when w.end_time is null then 'не указано'
-    else w.end_time
-end as время_закрытия
-from hospital h left join work_time w using(hospital_id) inner join available a using(availability_id)
-where (hospital_id=p_hospital_id or p_hospital_id is null) and h.delete_from_the_sys is null
-order by w.day, h.name;
+open out_cursor for
+    select h.name,
+    case w.day
+           when 1 then 'понедельник'
+           when 2 then 'вторник    '
+           when 3 then 'среда      '
+           when 4 then 'четверг    '
+           when 5 then 'пятница    '
+           when 6 then 'суббота    '
+           when 7 then 'воскресенье'
+           end as день_недели,
+    case
+           when w.begin_time is null then 'не указано'
+           else w.begin_time
+           end as время_открытия,
+    case
+           when w.end_time is null then 'не указано'
+           else w.end_time
+           end as время_закрытия
+
+    from hospital h left join work_time w using(hospital_id)
+    inner join available a using(availability_id)
+
+    where (hospital_id=p_hospital_id or p_hospital_id is null) and h.delete_from_the_sys is null
+    order by w.day, h.name;
 end;
 
 declare
@@ -309,17 +333,21 @@ begin
 end;
 
 --ЗАПРОС 8 - ФУНКЦИЯ
-create or replace function lazorenko_al.get_records(p_patient_id in number default null, p_record_stat_id in number default null)
-return sys_refcursor
-as
-v_cursor_1 sys_refcursor;
+create or replace function lazorenko_al.get_records(
+    p_patient_id in number default null,
+    p_record_stat_id in number default null)
+return sys_refcursor as
+    v_cursor_1 sys_refcursor;
 begin
 open v_cursor_1 for
- select last_name, first_name, petronymic, d.name, record_status.name, appointment_beg, appointment_end
-from lazorenko_al.patient p left join lazorenko_al.records using(patient_id) inner join record_status using(record_stat_id)
+    select last_name, first_name, petronymic, d.name, record_status.name, appointment_beg, appointment_end
+    from lazorenko_al.patient p left join lazorenko_al.records using(patient_id)
+    inner join record_status using(record_stat_id)
     inner join ticket using(ticket_id)
     inner join lazorenko_al.doctor d using(doctor_id)
+
     where (patient_id=p_patient_id or p_patient_id is null) and (record_stat_id=p_record_stat_id or p_record_stat_id is null);
+
 return v_cursor_1;
 end;
 
