@@ -482,3 +482,70 @@ end;
 
 
 
+--ПАКЕТ ДЛЯ ЗАПРОСА 3
+create or replace package lazorenko_al.pkg_query_3
+as
+    c_ownership_type constant number := 1;
+
+    procedure get_doctors_specs(
+    p_spec_id in number,
+    out_cursor out sys_refcursor);
+
+end;
+
+create or replace package body lazorenko_al.pkg_query_3
+as
+    procedure get_doctors_specs(
+    p_spec_id in number,
+    out_cursor out sys_refcursor)
+    as
+    begin
+    open out_cursor for
+    select h.name, a.name, count(d.doctor_id) as количество_врачей,
+    case
+        when o.ownership_type_id=1 then 'частная'
+        when o.ownership_type_id=2 then 'государственная'
+        end as форма_собственности,
+    case
+        when w.end_time is null then ' - '
+        else w.end_time
+        end as закрытие
+
+    from hospital h left join work_time w on h.hospital_id=w.hospital_id
+    inner join ownership_type o on h.ownership_type_id=o.ownership_type_id
+    inner join doctor d on d.hospital_id=h.hospital_id
+    inner join doctor_spec ds on d.doctor_id=ds.doctor_id
+    inner join available a on h.availability_id=a.availability_id
+
+    where (spec_id=p_spec_id or p_spec_id is null) and h.delete_from_the_sys is null
+           and w.day=to_char(sysdate, 'd')
+
+    group by h.name, a.name, o.ownership_type_id, w.end_time
+    order by case
+             when o.ownership_type_id=lazorenko_al.pkg_query_3.c_ownership_type then 1
+             else 0 end desc, количество_врачей desc,
+             case
+             when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
+             else 0
+             end desc;
+    end;
+end;
+
+declare
+    v_cursor sys_refcursor;
+    type record3 is record (hname varchar2(100), aname varchar2(100), doctor_count number,
+    oname varchar2(100), end_time varchar2(100));
+    v_hospital_time record3;
+begin
+    lazorenko_al.pkg_query_3.get_doctors_specs(4,v_cursor);
+    loop
+        fetch v_cursor into v_hospital_time;
+        exit when v_cursor%notfound;
+        dbms_output.put_line ('название больницы - ' || v_hospital_time.hname || '; сейчас '|| v_hospital_time.aname
+                                           ||'; число докторов указанной специальности=' || v_hospital_time.doctor_count ||
+                                            chr(10)||
+                                           '; форма собственности - '|| v_hospital_time.oname || '; закрывается в ' || v_hospital_time.end_time);
+    end loop;
+    close v_cursor;
+end;
+
