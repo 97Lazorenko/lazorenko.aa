@@ -72,7 +72,7 @@ v_record:=lazorenko_al.pkg_write_or_cancel.cancel_record(33);  --ОТМЕНА З
 end;
 
 
---ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ УСЛОВИЙ (СООТВЕТСТВИЕ ПОЛА И ВОЗРАСТА СПЕЦИАЛЬНОСТИ)
+--ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ УСЛОВИЙ ДЛЯ ПАЦТЕНТА (ПОЛ, ВОЗРАСТ, ДОКУМЕНТЫ ПАЦИЕНТА)
 
 create or replace package lazorenko_al.pkg_patient_parameters_check
 as
@@ -102,6 +102,9 @@ as
     p_spec_id in number)
     return boolean;
 
+    function patient_doc_check(
+    p_patient_id in number)
+    return boolean;
 
 end;
 
@@ -182,6 +185,20 @@ as
     return v_count>0;
     end;
 
+    function patient_doc_check(
+    p_patient_id in number)
+    return boolean as
+    v_count number;
+    begin
+    select count(*)
+    into v_count
+    from lazorenko_al.documents_numbers dn
+    where dn.patient_id=p_patient_id and dn.document_id=4
+          and dn.value is not null;
+
+    return v_count>0;
+    end;
+
 end;
 
 --ЕГО ПРОБА
@@ -189,13 +206,279 @@ end;
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.check_age(7,2));
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.check_age(7,2)); --ПРОВЕРКА ВОЗРАСТА
 dbms_output.put_line(v_check);
 end;
 
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.sex_check(2,6));
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.sex_check(2,6)); --ПРОВЕРКА ПОЛА
 dbms_output.put_line(v_check);
 end;
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.patient_doc_check(2)); --ПРОВЕРКА НАЛИЧИЯ ПОЛИСА
+dbms_output.put_line(v_check);
+end;
+
+
+--ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ УСЛОВИЙ ДЛЯ ТАЛОНА (ПОВТОРНАЯ ЗАПИСЬ, СТАТУС, ВРЕМЯ НАЧАЛА)
+
+create or replace package lazorenko_al.pkg_ticket_parameters_check
+as
+    c_rec_stat_constant_1 constant number := 1;
+    c_rec_stat_constant_2 constant number := 2;
+    c_rec_stat_constant_3 constant number := 3;
+    c_tick_stat_constant_1 constant number := 1;
+    c_tick_stat_constant_2 constant number := 2;
+
+    function ticket_check(
+    p_ticket_id in number,
+    p_patient_id number)
+    return boolean;
+
+    function ticket_status_check(
+    p_ticket_id in number,
+    p_patient_id number)
+    return boolean;
+
+    function time_check(
+    p_ticket_id in number)
+    return boolean;
+
+end;
+
+--ЕГО ТЕЛО
+create or replace package body lazorenko_al.pkg_ticket_parameters_check
+as
+    function ticket_check(
+    p_ticket_id in number,
+    p_patient_id number)
+    return boolean as
+    v_count number;
+    begin
+    select count(*)
+    into v_count
+    from lazorenko_al.records r right join lazorenko_al.ticket t on r.ticket_id=t.ticket_id
+
+    where (r.ticket_id=p_ticket_id and r.record_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_2 and (r.patient_id=p_patient_id or r.patient_id<>p_patient_id))
+          or (r.ticket_id=p_ticket_id and r.record_stat_id in (lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_1, lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_3)
+          and r.patient_id<>p_patient_id)
+          or (t.ticket_id=p_ticket_id and r.ticket_id is null and r.patient_id is null);
+
+    return v_count>0;
+    end;
+
+    function ticket_status_check(
+    p_ticket_id in number,
+    p_patient_id number)
+    return boolean as
+    v_count number;
+    begin
+    select count(*)
+    into v_count
+    from lazorenko_al.ticket t left join lazorenko_al.records r on r.ticket_id=t.ticket_id
+    where (t.ticket_id=p_ticket_id and t.ticket_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_tick_stat_constant_1)
+          or (t.ticket_id=p_ticket_id and t.ticket_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_tick_stat_constant_2 and r.patient_id=p_patient_id);
+
+    return v_count>0;
+    end;
+
+    function time_check(
+    p_ticket_id in number)
+    return boolean as
+    v_appointment_beg varchar2(100);
+    v_count number;
+    begin
+    v_appointment_beg:=lazorenko_al.appointment_beg_determine(p_ticket_id);
+    select count(*)
+    into v_count
+    from lazorenko_al.ticket t
+    where t.ticket_id=p_ticket_id and v_appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss');
+return v_count>0;
+end;
+
+end;
+
+--ЕГО ПРОБА
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.ticket_check(33, 2)); --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
+dbms_output.put_line(v_check);
+end;
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.ticket_status_check(33,2)); --ПРОВЕРКА СТАТУС ТАЛОНА
+dbms_output.put_line(v_check);
+end;
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.time_check(33)); --ПРОВЕРКА ВРЕМЕНИ НАЧАЛА
+dbms_output.put_line(v_check);
+end;
+
+
+
+--ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ ВВОДИМЫХ ПАРАМЕТРОВ ДЛЯ ЗАПИСИ И ОТМЕНЫ
+
+create or replace package lazorenko_al.pkg_parameters_check
+as
+    c_rec_stat_constant_1 constant number := 1;
+
+    function check_IN_parameters(
+    p_hospital_id in number,
+    p_doctor_id in number,
+    p_spec_id in number,
+    p_ticket_id in number)
+    return boolean;
+
+    function check_IN_parameters2(
+    p_patient_id in number,
+    p_ticket_id in number)
+    return boolean;
+
+end;
+
+--ЕГО ТЕЛО
+create or replace package body lazorenko_al.pkg_parameters_check
+as
+
+    function check_IN_parameters(
+    p_hospital_id in number,
+    p_doctor_id in number,
+    p_spec_id in number,
+    p_ticket_id in number)
+    return boolean as
+    v_count number;
+    begin
+    select count(*)
+    into v_count
+
+    from lazorenko_al.hospital h inner join lazorenko_al.doctor d on h.hospital_id=d.hospital_id
+    inner join lazorenko_al.doctor_spec ds on d.doctor_id=ds.doctor_id
+    inner join lazorenko_al.specialisation s on ds.spec_id=s.spec_id
+    inner join lazorenko_al.ticket t on d.doctor_id=t.doctor_id
+
+    where h.hospital_id=p_hospital_id and d.doctor_id=p_doctor_id and s.spec_id=p_spec_id
+          and t.ticket_id=p_ticket_id;
+
+    return v_count>0;
+    end;
+
+    function check_IN_parameters2(
+    p_patient_id in number,
+    p_ticket_id in number)
+    return boolean as
+    v_count number;
+    begin
+    select count(*)
+    into v_count
+    from lazorenko_al.records r
+    where r.patient_id=p_patient_id and r.ticket_id=p_ticket_id and r.record_stat_id=lazorenko_al.pkg_parameters_check.c_rec_stat_constant_1;
+
+    return v_count>0;
+    end;
+
+end;
+
+--ЕГО ПРОБА
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_parameters_check.check_IN_parameters(4, 3, 2, 33)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
+dbms_output.put_line(v_check);
+end;
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_parameters_check.check_IN_parameters2(2,31)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ОТМЕНЕ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
+dbms_output.put_line(v_check);
+end;
+
+
+
+
+--ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ НА УДАЛЕНИЕ ВРАЧЕЙ, СПЕЦИАЛЬНОСТЕЙ, БОЛЬНИЦ, И ВРЕМЕНИ ДО ЗАКРЫТИЯ
+
+create or replace package lazorenko_al.pkg_delete_and_time_check
+as
+    c_time_before_close_constant constant number := 1/12;
+
+
+    function hospital_time_check(
+    p_hospital_id in number)
+    return boolean;
+
+    function not_deleted_check(
+    p_doctor_id in number)
+    return boolean;
+
+end;
+
+
+--ЕГО ТЕЛО
+create or replace package body lazorenko_al.pkg_delete_and_time_check
+as
+    function hospital_time_check(
+    p_hospital_id in number)
+    return boolean as
+    v_count number;
+    begin
+    select count(*)
+    into v_count
+    from lazorenko_al.work_time w
+    where w.end_time>(TO_CHAR(sysdate+lazorenko_al.pkg_delete_and_time_check.c_time_before_close_constant, 'hh24:mi'))
+    and w.day in (to_char(sysdate, 'd')) and w.hospital_id=p_hospital_id;
+
+    return v_count>0;
+    end;
+
+    function not_deleted_check(
+    p_doctor_id in number)
+    return boolean as
+    v_count number;
+    begin
+    select count(*)
+    into v_count
+
+    from lazorenko_al.doctor d inner join lazorenko_al.hospital h on d.hospital_id=h.hospital_id
+    inner join lazorenko_al.doctor_spec ds on d.doctor_id=ds.doctor_id
+    inner join lazorenko_al.specialisation s on ds.spec_id=s.spec_id
+
+    where d.doctor_id=p_doctor_id and d.dismiss_date is null and h.delete_from_the_sys is null
+          and s.delete_from_the_sys is null;
+
+    return v_count>0;
+    end;
+
+end;
+
+--ЕГО ПРОБА
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_delete_and_time_check.hospital_time_check(4)); --ПРОВЕРКА ВРЕМЕНИ ДО ЗАКРЫТИЯ
+dbms_output.put_line(v_check);
+end;
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_delete_and_time_check.not_deleted_check(3)); --ПРОВЕРКА НА УДАЛЕНИЕ ВРАЧА, СПЕЦИАЛЬНОЙСТИ, БОЛЬНИЦЫ
+dbms_output.put_line(v_check);
+end;
+
+
+
