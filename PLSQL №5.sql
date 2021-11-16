@@ -493,6 +493,7 @@ as
 
 end;
 
+--ЕГО ТЕЛО
 create or replace package body lazorenko_al.pkg_query_3
 as
     procedure get_doctors_specs(
@@ -531,6 +532,7 @@ as
     end;
 end;
 
+--ЕГО ПРОБА
 declare
     v_cursor sys_refcursor;
     type record3 is record (hname varchar2(100), aname varchar2(100), doctor_count number,
@@ -548,4 +550,3 @@ begin
     end loop;
     close v_cursor;
 end;
-
