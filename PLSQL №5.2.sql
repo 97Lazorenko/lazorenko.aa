@@ -1,3 +1,5 @@
+--ФУНКЦИЯ С НЕЯВНЫМ КУРСОРОМ ДЛЯ ЗАПРОСА 3
+
 create or replace function get_doctors_spec2(
     p_spec_id in number)
 return varchar2 as v_text varchar2(300);
@@ -39,7 +41,8 @@ begin
     return v_text;
     end;
 
---ЕЁ ПРОБА
+--ПРОВЕРКА РАБОТОСПОСОБНОСТИ ФУНКЦИИ ДЛЯ ЗАПРОСА 3
+
 declare
 v_text varchar2(300);
 begin
@@ -49,6 +52,7 @@ end;
 
 
 --ПАКЕТ ДЛЯ ЗАПРСА 3
+
 create or replace package lazorenko_al.pkg_query_3_v_2
 as
     c_ownership_type constant number := 1;
@@ -59,7 +63,9 @@ as
 
 end;
 
---ЕГО ТЕЛО
+
+--ТЕЛО ПАКЕТА ДЛЯ ЗАПРОСА 3
+
 create or replace package body lazorenko_al.pkg_query_3_v_2
 as
     function get_doctors_spec2(
@@ -103,7 +109,8 @@ as
     end;
 end;
 
---ЕГО ПРОБА
+--ИСПОЛЬЗОВАНИЕ ПАКЕТА
+
 declare
 v_text varchar2(400);
 begin

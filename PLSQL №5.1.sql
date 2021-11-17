@@ -1,3 +1,7 @@
+------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------ЗАПИСЬ И ОТМЕНА ЗАПИСИ-------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+
 --ПАКЕТ С ФУНКЦИЕЙ ЗАПИСИ И ОТМЕНЫ ЗАПИСИ
 create or replace package lazorenko_al.pkg_write_or_cancel
 as
@@ -71,6 +75,9 @@ begin
 v_record:=lazorenko_al.pkg_write_or_cancel.cancel_record(33);  --ОТМЕНА ЗАПИСИ
 end;
 
+------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------ПАЦИЕНТ-------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
 --ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ УСЛОВИЙ ДЛЯ ПАЦТЕНТА (ПОЛ, ВОЗРАСТ, ДОКУМЕНТЫ ПАЦИЕНТА)
 
@@ -206,25 +213,30 @@ end;
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.check_age(7,2)); --ПРОВЕРКА ВОЗРАСТА
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.check_age(
+    3,2)); --ПРОВЕРКА ВОЗРАСТА
 dbms_output.put_line(v_check);
 end;
 
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.sex_check(2,6)); --ПРОВЕРКА ПОЛА
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.sex_check(
+    3,6)); --ПРОВЕРКА ПОЛА
 dbms_output.put_line(v_check);
 end;
 
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.patient_doc_check(2)); --ПРОВЕРКА НАЛИЧИЯ ПОЛИСА
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.patient_doc_check(
+    3)); --ПРОВЕРКА НАЛИЧИЯ ПОЛИСА
 dbms_output.put_line(v_check);
 end;
 
-
+------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------ТАЛОН----------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 --ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ УСЛОВИЙ ДЛЯ ТАЛОНА (ПОВТОРНАЯ ЗАПИСЬ, СТАТУС, ВРЕМЯ НАЧАЛА)
 
 create or replace package lazorenko_al.pkg_ticket_parameters_check
@@ -264,7 +276,8 @@ as
     into v_count
     from lazorenko_al.records r right join lazorenko_al.ticket t on r.ticket_id=t.ticket_id
 
-    where (r.ticket_id=p_ticket_id and r.record_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_2 and (r.patient_id=p_patient_id or r.patient_id<>p_patient_id))
+    where (r.ticket_id=p_ticket_id and r.record_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_2
+                                   and (r.patient_id=p_patient_id or r.patient_id<>p_patient_id))
           or (r.ticket_id=p_ticket_id and r.record_stat_id in (lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_1, lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_3)
           and r.patient_id<>p_patient_id)
           or (t.ticket_id=p_ticket_id and r.ticket_id is null and r.patient_id is null);
@@ -282,7 +295,8 @@ as
     into v_count
     from lazorenko_al.ticket t left join lazorenko_al.records r on r.ticket_id=t.ticket_id
     where (t.ticket_id=p_ticket_id and t.ticket_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_tick_stat_constant_1)
-          or (t.ticket_id=p_ticket_id and t.ticket_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_tick_stat_constant_2 and r.patient_id=p_patient_id);
+          or (t.ticket_id=p_ticket_id and t.ticket_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_tick_stat_constant_2
+                                      and r.patient_id=p_patient_id);
 
     return v_count>0;
     end;
@@ -308,25 +322,30 @@ end;
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.ticket_check(33, 2)); --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.ticket_check(
+    33, 2)); --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
 dbms_output.put_line(v_check);
 end;
 
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.ticket_status_check(33,2)); --ПРОВЕРКА СТАТУС ТАЛОНА
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.ticket_status_check(
+    33,2)); --ПРОВЕРКА СТАТУС ТАЛОНА
 dbms_output.put_line(v_check);
 end;
 
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.time_check(33)); --ПРОВЕРКА ВРЕМЕНИ НАЧАЛА
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.time_check(
+    33)); --ПРОВЕРКА ВРЕМЕНИ НАЧАЛА
 dbms_output.put_line(v_check);
 end;
 
-
+------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------ВВОДИМЫЕ ПАРАМЕТРЫ-----------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
 --ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ ВВОДИМЫХ ПАРАМЕТРОВ ДЛЯ ЗАПИСИ И ОТМЕНЫ
 
@@ -383,7 +402,8 @@ as
     select count(*)
     into v_count
     from lazorenko_al.records r
-    where r.patient_id=p_patient_id and r.ticket_id=p_ticket_id and r.record_stat_id=lazorenko_al.pkg_parameters_check.c_rec_stat_constant_1;
+    where r.patient_id=p_patient_id and r.ticket_id=p_ticket_id
+    and r.record_stat_id=lazorenko_al.pkg_parameters_check.c_rec_stat_constant_1;
 
     return v_count>0;
     end;
@@ -395,19 +415,23 @@ end;
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_parameters_check.check_IN_parameters(4, 3, 2, 33)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_parameters_check.check_IN_parameters(
+    4, 3, 2, 33)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
 dbms_output.put_line(v_check);
 end;
 
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_parameters_check.check_IN_parameters2(2,31)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ОТМЕНЕ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_parameters_check.check_IN_parameters2(
+    2,31)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ОТМЕНЕ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
 dbms_output.put_line(v_check);
 end;
 
 
-
+------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------УДАЛЕНИЕ И ВРЕМЕННЫЕ ОГРАНИЧЕНИЯ---------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
 --ПАКЕТ С ФУНКЦИЯМИ ПРОВЕРКИ НА УДАЛЕНИЕ ВРАЧЕЙ, СПЕЦИАЛЬНОСТЕЙ, БОЛЬНИЦ, И ВРЕМЕНИ ДО ЗАКРЫТИЯ
 
@@ -469,14 +493,16 @@ end;
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_delete_and_time_check.hospital_time_check(4)); --ПРОВЕРКА ВРЕМЕНИ ДО ЗАКРЫТИЯ
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_delete_and_time_check.hospital_time_check(
+    4)); --ПРОВЕРКА ВРЕМЕНИ ДО ЗАКРЫТИЯ
 dbms_output.put_line(v_check);
 end;
 
 declare
 v_check number;
 begin
-v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_delete_and_time_check.not_deleted_check(3)); --ПРОВЕРКА НА УДАЛЕНИЕ ВРАЧА, СПЕЦИАЛЬНОЙСТИ, БОЛЬНИЦЫ
+v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_delete_and_time_check.not_deleted_check(
+    3)); --ПРОВЕРКА НА УДАЛЕНИЕ ВРАЧА, СПЕЦИАЛЬНОЙСТИ, БОЛЬНИЦЫ
 dbms_output.put_line(v_check);
 end;
 
