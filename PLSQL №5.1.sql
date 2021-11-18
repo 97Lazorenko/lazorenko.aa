@@ -277,7 +277,7 @@ as
     from lazorenko_al.records r right join lazorenko_al.ticket t on r.ticket_id=t.ticket_id
 
     where (r.ticket_id=p_ticket_id and r.record_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_2
-                                   and (r.patient_id=p_patient_id or r.patient_id<>p_patient_id))
+                                   /*and (r.patient_id=p_patient_id or r.patient_id<>p_patient_id)*/)
           or (r.ticket_id=p_ticket_id and r.record_stat_id in (lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_1, lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_3)
           and r.patient_id<>p_patient_id)
           or (t.ticket_id=p_ticket_id and r.ticket_id is null and r.patient_id is null);
