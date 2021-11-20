@@ -83,9 +83,6 @@ end;
 
 create or replace package lazorenko_al.pkg_patient_parameters_check
 as
-    v_patient lazorenko_al.patient%rowtype;
-    v_count number;
-    v_age number;
 
     function get_patient_info_by_id(
     p_patient_id number)
@@ -127,7 +124,9 @@ as
     into v_patient
     from lazorenko_al.patient p
     where p.patient_id = p_patient_id;
-
+    return v_patient;
+    exception
+        when no_data_found then dbms_output.put_line('данный пациент отсутствует в базе больницы');
     return v_patient;
     end;
 
@@ -152,7 +151,9 @@ as
     into v_sex
     from lazorenko_al.patient p
     where p.patient_id=p_patient_id;
-
+    return v_sex;
+    exception
+        when no_data_found then dbms_output.put_line('данный пациент отсутствует в базе больницы');
     return v_sex;
     end;
 
@@ -168,7 +169,9 @@ as
     into v_count
     from lazorenko_al.specialisation s
     where s.spec_id=p_spec_id and (s.sex_id=v_sex or s.sex_id is null);
-
+    return v_count>0;
+    exception
+        when no_data_found then dbms_output.put_line('данный пациент отсутствует в базе больницы');
     return v_count>0;
     end;
 
@@ -188,7 +191,9 @@ as
     where s.spec_id = p_spec_id
           and (s.min_age <= v_age or s.min_age is null)
           and (s.max_age >= v_age or s.max_age is null);
-
+    return v_count>0;
+    exception
+        when no_data_found then dbms_output.put_line('данный пациент отсутствует в базе больницы');
     return v_count>0;
     end;
 
@@ -214,7 +219,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.check_age(
-    3,2)); --ПРОВЕРКА ВОЗРАСТА
+    9,2)); --ПРОВЕРКА ВОЗРАСТА
 dbms_output.put_line(v_check);
 end;
 
@@ -222,7 +227,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.sex_check(
-    3,6)); --ПРОВЕРКА ПОЛА
+    1,2)); --ПРОВЕРКА ПОЛА
 dbms_output.put_line(v_check);
 end;
 
@@ -230,7 +235,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.patient_doc_check(
-    3)); --ПРОВЕРКА НАЛИЧИЯ ПОЛИСА
+    9)); --ПРОВЕРКА НАЛИЧИЯ ПОЛИСА
 dbms_output.put_line(v_check);
 end;
 

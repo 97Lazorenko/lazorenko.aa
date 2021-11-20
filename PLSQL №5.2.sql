@@ -41,6 +41,7 @@ begin
     return v_text;
     end;
 
+
 --ПРОВЕРКА РАБОТОСПОСОБНОСТИ ФУНКЦИИ ДЛЯ ЗАПРОСА 3
 
 declare
@@ -114,6 +115,6 @@ end;
 declare
 v_text varchar2(400);
 begin
-v_text:=lazorenko_al.pkg_query_3_v_2.get_doctors_spec2(1);
+v_text:=lazorenko_al.pkg_query_3_v_2.get_doctors_spec2(6);
 dbms_output.put_line(v_text);
 end;
