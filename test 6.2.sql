@@ -50,8 +50,8 @@ end;
 
 
 declare
-    /*v_value varchar2(100) := 'string';*/
-    v_value number := 5;
+    v_value varchar2(100) := 'string';
+    /*v_value number := 5;*/
 begin
 
    lazorenko_al.pkg_fail.fail_method(

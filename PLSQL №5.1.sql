@@ -12,13 +12,14 @@ as
     v_record_id lazorenko_al.records.record_id%type;
 
     v_record_id number;
-        function cancel_record(
+
+    function cancel_record(
     p_ticket_id in number)
     return number;
 
     function write_to_records(
-         p_patient_id in number,
-         p_ticket_id in number)
+    p_patient_id in number,
+    p_ticket_id in number)
     return lazorenko_al.records.record_id%type;
 end;
 
@@ -227,7 +228,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_patient_parameters_check.sex_check(
-    1,2)); --ПРОВЕРКА ПОЛА
+    9,5)); --ПРОВЕРКА ПОЛА
 dbms_output.put_line(v_check);
 end;
 
@@ -328,7 +329,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.ticket_check(
-    33, 2)); --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
+    33, 99)); --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
 dbms_output.put_line(v_check);
 end;
 
@@ -336,7 +337,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_parameters_check.ticket_status_check(
-    33,2)); --ПРОВЕРКА СТАТУС ТАЛОНА
+    33,5)); --ПРОВЕРКА СТАТУС ТАЛОНА
 dbms_output.put_line(v_check);
 end;
 
@@ -421,7 +422,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_parameters_check.check_IN_parameters(
-    4, 3, 2, 33)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
+    5, 3, 2, 33)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
 dbms_output.put_line(v_check);
 end;
 
@@ -499,7 +500,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_delete_and_time_check.hospital_time_check(
-    4)); --ПРОВЕРКА ВРЕМЕНИ ДО ЗАКРЫТИЯ
+    6)); --ПРОВЕРКА ВРЕМЕНИ ДО ЗАКРЫТИЯ
 dbms_output.put_line(v_check);
 end;
 
@@ -507,7 +508,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_delete_and_time_check.not_deleted_check(
-    3)); --ПРОВЕРКА НА УДАЛЕНИЕ ВРАЧА, СПЕЦИАЛЬНОЙСТИ, БОЛЬНИЦЫ
+    1)); --ПРОВЕРКА НА УДАЛЕНИЕ ВРАЧА, СПЕЦИАЛЬНОЙСТИ, БОЛЬНИЦЫ
 dbms_output.put_line(v_check);
 end;
 

@@ -6,8 +6,21 @@ create table lazorenko_al.error_log(
     sh_dt date default sysdate,
     object_name varchar2(200),
     log_type varchar2(1000),
-    params varchar2(4000)
+    params varchar2(4000))
+    partition by range (sh_dt)
+    interval (NUMTOYMINTERVAL(3, 'MONTH'))
+(
+    partition error_log_2021_qrt4 values less than (to_date('22.02.2022 00:00', 'dd.mm.yyyy hh24:mi'))
 );
+
+
+select * from sys.user_part_tables;
+select * from sys.user_tab_partitions;
+
+drop table lazorenko_al.error_log purge;
+
+
+
 
 
 
@@ -15,6 +28,7 @@ create table lazorenko_al.error_log(
 
 
 create or replace procedure lazorenko_al.add_error_log(
+    p_sh_dt date,
     p_object_name varchar2,
     p_params varchar2,
     p_log_type varchar2 default 'common'
@@ -23,8 +37,8 @@ as
 pragma autonomous_transaction;
 begin
 
-    insert into lazorenko_al.error_log(object_name, log_type, params)
-    values (p_object_name, p_log_type, p_params);
+    insert into lazorenko_al.error_log(sh_dt, object_name, log_type, params)
+    values (p_sh_dt, p_object_name, p_log_type, p_params);
 
     commit;
 end;
@@ -53,6 +67,7 @@ begin
         when others then
 
             lazorenko_al.add_error_log(
+                to_date('2022-03-22 10:00:00', 'yyyy-MM-dd HH:mI:ss'),
                 $$plsql_unit_owner||'.'||$$plsql_unit,
                 '{"error":"' || sqlerrm
                 ||'","value":"' || p_value
