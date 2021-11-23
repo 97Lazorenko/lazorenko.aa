@@ -20,8 +20,8 @@ select *
             select *
             from lazorenko_al.error_log er
             where er.params like '{"%'  --если у вас всё-таки будет там лежать и не nosql в перемешку
-           and trunc(er.sh_dt) = trunc(to_date('22.03.2022','dd.mm.yyyy'))
+           and trunc(er.sh_dt) = trunc(to_date('23.11.2021','dd.mm.yyyy'))
         ) er
     ) jt
-where jt.params like '%string%' and jt.object_name='LAZORENKO_AL.FAIL_METHOD'
+where jt.params like /*'%string%'*/'%10%' and jt.object_name='LAZORENKO_AL.WRITE_TO_RECORDS'
 ;

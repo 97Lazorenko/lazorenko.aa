@@ -20,7 +20,7 @@ as
     function write_to_records(
     p_patient_id in number,
     p_ticket_id in number)
-    return lazorenko_al.records.record_id%type;
+    return number;
 end;
 
 --ЕГО ТЕЛО
@@ -30,8 +30,8 @@ as
          p_patient_id in number,
          p_ticket_id in number
     )
-    return lazorenko_al.records.record_id%type as
-    v_record_id lazorenko_al.records.record_id%type;
+    return number as
+    v_record_id number;
 
     begin
     insert into lazorenko_al.records(record_id, record_stat_id, patient_id, ticket_id)
@@ -73,7 +73,7 @@ end;
 declare
 v_record number;
 begin
-v_record:=lazorenko_al.pkg_write_or_cancel.cancel_record(33);  --ОТМЕНА ЗАПИСИ
+v_record:=lazorenko_al.pkg_write_or_cancel.cancel_record(88);  --ОТМЕНА ЗАПИСИ
 end;
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -93,9 +93,9 @@ as
     p_date date)
     return number;
 
-    function sex_determine(
+   /* function sex_determine(
     p_patient_id number)
-    return number;
+    return number; */
 
     function sex_check(
     p_patient_id in number,
@@ -126,9 +126,9 @@ as
     from lazorenko_al.patient p
     where p.patient_id = p_patient_id;
     return v_patient;
-    exception
+   /* exception
         when no_data_found then dbms_output.put_line('данный пациент отсутствует в базе больницы');
-    return v_patient;
+    return v_patient;*/
     end;
 
     function calculate_age_from_date(
@@ -143,7 +143,7 @@ as
     return v_age;
     end;
 
-    function sex_determine(
+   /* function sex_determine(
     p_patient_id number)
     return number as
     v_sex number;
@@ -153,19 +153,21 @@ as
     from lazorenko_al.patient p
     where p.patient_id=p_patient_id;
     return v_sex;
-    exception
+    /*exception
         when no_data_found then dbms_output.put_line('данный пациент отсутствует в базе больницы');
     return v_sex;
-    end;
+    end;*/
 
     function sex_check(
     p_patient_id in number,
     p_spec_id in number)
     return boolean as
     v_sex number;
+    v_patient lazorenko_al.patient%rowtype;
     v_count number;
     begin
-    v_sex:=lazorenko_al.sex_determine(p_patient_id);
+    v_patient:=lazorenko_al.get_patient_info_by_id(p_patient_id);
+    v_sex:=v_patient.sex_id;
     select count(*)
     into v_count
     from lazorenko_al.specialisation s
