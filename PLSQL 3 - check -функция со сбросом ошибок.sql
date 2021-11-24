@@ -128,7 +128,7 @@ return  number as
             p_patient_id => v_patient_id,
             p_spec_id => v_spec_id))
 
-        then v_record_id:=lazorenko_al.pkg_write_or_cancel.write_to_records(        --    В данной функции тожу обрабатываются
+        then v_record_id:=lazorenko_al.pkg_write_or_cancel.write_to_records(        --    В данной функции тоже обрабатываются
             p_patient_id => v_patient_id,                                           --    ошибки. Ознакомиться с данным пакетом
             p_ticket_id => v_ticket_id,                                             --    и функцией можно в PLSQL 2
             p_need_handle => v_need_handle);
@@ -149,7 +149,8 @@ return  number as
 declare
     v_result number;
 begin
-    v_result:=lazorenko_al.accept_record_by_rules_with_exceptions(33, 10, 6, v_result, true);
+    v_result:=lazorenko_al.accept_record_by_rules_with_exceptions(
+    33, 10, 6, v_result, true); --исключения сразу из двух функций
 
     commit;
 
@@ -160,7 +161,8 @@ end;
 declare
     v_result number;
 begin
-    v_result:=lazorenko_al.accept_record_by_rules_with_exceptions(33, 7, 6, v_result, true);
+    v_result:=lazorenko_al.accept_record_by_rules_with_exceptions(
+    33, 7, 6, v_result, true);
 
     commit;
 
@@ -171,11 +173,26 @@ end;
 declare
     v_result number;
 begin
-    v_result:=lazorenko_al.accept_record_by_rules_with_exceptions(100, 3, 6, v_result, true);
+    v_result:=lazorenko_al.accept_record_by_rules_with_exceptions(
+    10, 3, 6, v_result, true);
 
     commit;
 
 end;
 
+
+------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------ОТВЕТ НА ВОПРОС------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+/*
+    В целом вариант со сбросом ошибки оказался достаточно интересным решением. С одной стороны, по функциональности он
+ явно не уступает прежнему варианту, где с помощью dbms_output.put_line в случае провала проверки выводились
+ уведомления, содержащие соответствующую информацию. Кроме того, за счёт логирования сбрасываемых ошибок
+ у нас появляется ценная информация, которая может быть использована для доработки скриптов или в иных целях (например,
+ аналитических - при доработке таблицы логов).
+    С другой стороны, такой вариант показался мне более трудоёмким, потребовалось подойти с большим вниманием к
+подготоаке скриптов. Возможно это связано с необходимостью переработки прежних скриптов, а также с новизной (для меня)
+темы обработки исключений.
+ */
 
 

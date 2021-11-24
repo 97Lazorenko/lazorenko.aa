@@ -1,6 +1,11 @@
 ------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------Метод логирования с автономной транзакцией---------------------------------
 ------------------------------------------------------------------------------------------------------------------------
+
+
+
+-- НЕОБХОДИМО ПЕРЕСОЗДАТЬ МЕТОД, ПОСКОЛЬКУ ОН ПОДВЕРГАЛСЯ ПРЕОБРАЗОВАНИЯМ В ПРЕДЫДУЩЕМ ШАГЕ
+
 create or replace procedure lazorenko_al.add_error_log(
     p_object_name varchar2,
     p_params varchar2,
@@ -22,6 +27,7 @@ end;
 ------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------Отлов и логирование ошибок-------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
+
 
 --ПРОВЕРКА ПОЛА С ОТЛОВОМ ОШИБОК И ЛОГИРОВАНИЕМ
 
@@ -45,7 +51,7 @@ return boolean as
 
     return v_count>0;
 
-    exception
+      exception
 
         when no_data_found then lazorenko_al.add_error_log(
                 $$plsql_unit_owner||'.'||$$plsql_unit,
@@ -67,7 +73,7 @@ declare
     v_check number;
 begin
     v_check:=sys.diutil.bool_to_int(lazorenko_al.sex_check(
-    9,5)); --ПРОВЕРКА ПОЛА
+    10,5)); --ПРОВЕРКА ПОЛА
 
     dbms_output.put_line(v_check);
 
@@ -99,7 +105,7 @@ return boolean as
 
     return v_count>0;
 
-    exception
+      exception
         when no_data_found then lazorenko_al.add_error_log(
                 $$plsql_unit_owner||'.'||$$plsql_unit,
                 '{"error":"' || sqlerrm
@@ -259,7 +265,7 @@ end;
 --ЗАПИСЬ
 declare
     v_patient number := 10;
-    v_ticket number :=100;
+    v_ticket number :=33;
     v_record number;
 begin
    v_record:=lazorenko_al.pkg_write_or_cancel.write_to_records(
@@ -305,9 +311,9 @@ select *
         from (
             select *
             from lazorenko_al.error_log er
-            where er.params like '{"%'  --если у вас всё-таки будет там лежать и не nosql в перемешку
-           and trunc(er.sh_dt) between trunc(to_date('23.11.2021','dd.mm.yyyy')) and trunc(to_date('25.11.2021','dd.mm.yyyy'))
+            where er.params like '{"%'
+           and trunc(er.sh_dt) between trunc(to_date('23.11.2021','dd.mm.yyyy')) and trunc(to_date('27.11.2021','dd.mm.yyyy'))
         ) er
     ) jt
-where jt.params like /*'%string%'*/'%10%' and jt.object_name='LAZORENKO_AL.WRITE_TO_RECORDS'
+where jt.params like '%1%' and jt.object_name like 'LAZORENKO_AL.PKG_WRITE_OR_CANCEL%'
 ;

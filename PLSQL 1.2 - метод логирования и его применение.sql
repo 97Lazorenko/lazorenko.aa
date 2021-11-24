@@ -123,7 +123,7 @@ begin
 end;
 
 --ВОССТАНОВЛЕНИЕ ИНДЕКСА
-alter index lazorenko_al.SYS_C0028810 rebuild;
+alter index lazorenko_al.SYS_C0028966 rebuild;
 
 ------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------ВНЕСЕНИЯ ЗАПИСЕЙ В ДРУГУЮ СЕКЦИЮ--------------------------------------------
@@ -131,7 +131,7 @@ alter index lazorenko_al.SYS_C0028810 rebuild;
 
 --КОРРЕКТИРОВКА МЕТОДА ЛОГИРОВАНИЯ ДЛЯ ВОЗМОЖНОСТИ ВНЕСЕНИЯ ДАННЫХ В НОВУЮ СЕКЦИЮ
 create or replace procedure lazorenko_al.add_error_log(
-    p_sh_dt date, --БУДЕМ ЯВНО УКАЗЫВАТЬ ДАТУ И ВРЕМЯ
+    p_sh_dt date,                                     --БУДЕМ ЯВНО УКАЗЫВАТЬ ДАТУ И ВРЕМЯ
     p_object_name varchar2,
     p_params varchar2,
     p_log_type varchar2 default 'common'
@@ -231,7 +231,7 @@ begin
 end;
 
 --ОЧИСТКА ВТОРОЙ СЕКЦИИ
-alter table lazorenko_al.error_log truncate partition SYS_P1374;
+alter table lazorenko_al.error_log truncate partition SYS_P1410;
 
 --ПРОВЕРКА ОЧИСТКИ
 select *
@@ -246,4 +246,4 @@ begin
     dbms_output.put_line(v_index_name); --ПОЛУЧАЕМ ИМЯ ИНДЕКСА
 end;
 
-alter index lazorenko_al.SYS_C0028810 rebuild;
+alter index lazorenko_al.SYS_C0028966 rebuild;
