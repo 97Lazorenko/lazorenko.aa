@@ -132,7 +132,7 @@ create or replace function write_to_records(
                 ||'","backtrace":"' || dbms_utility.format_error_backtrace()
                 ||'"}'
                 );
-                dbms_output.put_line('запиь внести невозможно - укажите другого пациента или талон');
+                dbms_output.put_line('запись внести невозможно - укажите другого пациента или талон');
             rollback;
             return v_record_id;
             end;
@@ -252,7 +252,7 @@ as
                 ||'","backtrace":"' || dbms_utility.format_error_backtrace()
                 ||'"}'
                 );
-                dbms_output.put_line('запиь внести невозможно - укажите другого пациента или талон');
+                dbms_output.put_line('запись внести невозможно - укажите другого пациента или талон');
             rollback;
             return v_record_id;
             end;
@@ -347,7 +347,7 @@ select *
             select *
             from lazorenko_al.error_log er
             where er.params like '{"%'  --если у вас всё-таки будет там лежать и не nosql в перемешку
-           and trunc(er.sh_dt) = trunc(to_date('23.11.2021','dd.mm.yyyy'))
+           and trunc(er.sh_dt) between trunc(to_date('23.11.2021','dd.mm.yyyy')) and trunc(to_date('25.11.2021','dd.mm.yyyy'))
         ) er
     ) jt
 where jt.params like /*'%string%'*/'%10%' and jt.object_name='LAZORENKO_AL.WRITE_TO_RECORDS'
