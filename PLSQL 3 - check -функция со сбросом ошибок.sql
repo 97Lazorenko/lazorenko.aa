@@ -6,7 +6,7 @@ create or replace function check_age(
     p_patient_id in number,
     p_spec_id in number)
 return boolean as
-    v_patient lazorenko_al.patient%rowtype;
+    v_patient lazorenko_al.t_patient;
     v_age number;
     v_count number;
 
@@ -29,22 +29,8 @@ return boolean as
        raise_application_error (-20400, 'возраст пациента не соответствует полу специальности');
 
     end if;
-
-    return v_count>0;
-
-    exception
-        when no_data_found then
-            lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
-        '{"error":"' || sqlerrm
-                  ||'","value":"' || p_patient_id
-                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
-                  ||'"}'
-        );
-
-        dbms_output.put_line('данный пациент отсутствует в базе больницы');
-
         return v_count>0;
+    exception
 
         when e_wrong_age then
             lazorenko_al.add_error_log(
@@ -57,9 +43,52 @@ return boolean as
 
             dbms_output.put_line('возраст пациента не соответствует полу специальности');
 
-        return v_count>0;
+        return false;
 
     end;
+
+
+    create or replace function sex_check(
+    p_patient_id in number,
+    p_spec_id in number)
+    return boolean as
+    v_sex number;
+    v_patient lazorenko_al.t_patient;
+    v_count number;
+
+    e_wrong_sex exception;
+    pragma exception_init (e_wrong_sex, -20401);
+
+
+    begin
+    v_patient:=lazorenko_al.get_patient_info_by_id(p_patient_id);
+    v_sex:=v_patient.sex_id;
+    select count(*)
+    into v_count
+    from lazorenko_al.specialisation s
+    where s.spec_id=p_spec_id and (s.sex_id=v_sex or s.sex_id is null);
+    if v_count=0 then
+       raise_application_error (-20401, 'пол пациента не соответствует полу специальности');
+    return v_count>0;
+    end if;
+        return v_count>0;
+    exception
+
+        when e_wrong_sex then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' || p_patient_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('пол пациента не соответствует полу специальности');
+
+        return false;
+
+    end;
+
 
 --ПРИМЕНЕНИЕ ФУНКЦИИ - ВВОДИМ ID ПАЦИЕНТА, ОТСУТСТВУЮЩЕГО В БД
 
@@ -101,6 +130,13 @@ as
     begin
 
     if (not lazorenko_al.check_age(
+        p_patient_id => p_patient_id,
+        p_spec_id => p_spec_id
+        ))
+    then v_result:=false;
+    end if;
+
+    if (not lazorenko_al.sex_check(
         p_patient_id => p_patient_id,
         p_spec_id => p_spec_id
         ))
@@ -150,7 +186,7 @@ declare
     v_result number;
 begin
     v_result:=lazorenko_al.accept_record_by_rules_with_exceptions(
-    33, 10, 6, v_result, true); --исключения сразу из двух функций
+    33, 7, 6, v_result, true); --исключения сразу из двух функций
 
     commit;
 

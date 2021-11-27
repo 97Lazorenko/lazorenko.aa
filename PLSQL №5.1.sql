@@ -127,13 +127,13 @@ as
     where p.patient_id = p_patient_id;
     return v_patient;
    exception
-                when no_data_found then lazorenko_al.add_error_log(
+                when no_data_found then /* lazorenko_al.add_error_log(
                 $$plsql_unit_owner||'.'||$$plsql_unit,
                 '{"error":"' || sqlerrm
                 ||'","value":"' || p_patient_id
                 ||'","backtrace":"' || dbms_utility.format_error_backtrace()
                 ||'"}'
-        );
+        ); */
 
         dbms_output.put_line('данный пациент отсутствует в базе больницы');
     return v_patient;
