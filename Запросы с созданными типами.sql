@@ -130,7 +130,7 @@ begin
         hname => h.name,
         aname => a.name,
         doctor_id => count(d.doctor_id),
-        ownershhip_type =>
+        ownership_type =>
     case
         when o.ownership_type_id=1 then 'частная'
         when o.ownership_type_id=2 then 'государственная'
@@ -140,7 +140,7 @@ begin
         when w.end_time is null then ' - '
         else w.end_time
         end)
-
+    bulk collect into arr_hospital_info
     from hospital h left join work_time w on h.hospital_id=w.hospital_id
     inner join ownership_type o on h.ownership_type_id=o.ownership_type_id
     inner join doctor d on d.hospital_id=h.hospital_id
@@ -161,7 +161,26 @@ begin
     return arr_hospital_info;
 end;
 
+--вывод
+declare
+    v_arr_hospital_info lazorenko_al.t_arr_hospital_info := lazorenko_al.t_arr_hospital_info();
 
+begin
+
+    v_arr_hospital_info := lazorenko_al.get_doctors_specs_with_own_types(2);
+
+    if v_arr_hospital_info.count>0 then
+    for i in v_arr_hospital_info.first..v_arr_hospital_info.last
+    loop
+    declare
+        v_item lazorenko_al.t_hospital_info :=v_arr_hospital_info(i);
+    begin
+        dbms_output.put_line(v_item.hname || ' '|| v_item.aname || ' '|| v_item.doctor_id || ' '|| v_item.ownership_type || ' '|| v_item.end_time);
+    end;
+    end loop;
+    end if;
+
+end;
 
 
 
@@ -255,20 +274,6 @@ begin
 return arr_ticket;
 end;
 
-declare
-    v_cursor sys_refcursor;
-    type record5 is record (ticket_id number, dname varchar2(100), appointment_beg varchar2(100), appointment_end varchar2(100));
-    v_ticket record5;
-begin
-    lazorenko_al.get_ticket(4,v_cursor);
-    loop
-        fetch v_cursor into v_ticket;
-        exit when v_cursor%notfound;
-        dbms_output.put_line ('id талона - ' ||v_ticket.ticket_id || '; врач - ' ||v_ticket.dname ||'; начало приёма - '||
-                             v_ticket.appointment_beg || '; конец приёма - ' || v_ticket.appointment_end);
-    end loop;
-    close v_cursor;
-end;
 
 --вывод
 declare
