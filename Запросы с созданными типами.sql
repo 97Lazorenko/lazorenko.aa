@@ -175,7 +175,8 @@ begin
     declare
         v_item lazorenko_al.t_hospital_info :=v_arr_hospital_info(i);
     begin
-        dbms_output.put_line(v_item.hname || ' '|| v_item.aname || ' '|| v_item.doctor_id || ' '|| v_item.ownership_type || ' '|| v_item.end_time);
+        dbms_output.put_line(v_item.hname || ' '|| v_item.aname || ' '|| v_item.doctor_id
+                                 || ' '|| v_item.ownership_type || ' '|| v_item.end_time);
     end;
     end loop;
     end if;
