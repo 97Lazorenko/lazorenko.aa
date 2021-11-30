@@ -1,36 +1,4 @@
 
-create or replace type lazorenko_al.t_patient as object(
-    patient_id number,
-    born_date date,
-    sex_id number
-);
-
---добавление собственного конструктора
-alter type lazorenko_al.t_patient
-add constructor function t_patient(
-    patient_id number,
-    born_date date,
-    sex_id number
-) return self as result
-cascade;
-
---но тогда мы обязаны реализовать его в теле
-create or replace type body lazorenko_al.t_patient
-as
-    constructor function t_patient(
-        patient_id number,
-        born_date date,
-        sex_id number
-    )
-    return self as result
-    as
-    begin
-        self.patient_id := patient_id;
-        self.born_date := born_date;
-        self.sex_id := sex_id;
-        return;
-    end;
-end;
 
 create or replace function get_patient_info_by_id(
     p_patient_id number)

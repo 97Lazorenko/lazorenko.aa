@@ -136,6 +136,4 @@ create or replace type lazorenko_al.t_record as object(
 
 create or replace type lazorenko_al.t_arr_record as table of lazorenko_al.t_record;
 
-create or replace type lazorenko_al.t_extended_record as object(
-    records lazorenko_al.t_record,
-    ticket lazorenko_al.t_arr_tickets);
+
