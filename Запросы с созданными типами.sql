@@ -51,7 +51,7 @@ begin
     declare
         v_item lazorenko_al.t_city_with_regions :=v_arr_city_with_regions(i);
     begin
-        dbms_output.put_line(v_item.names || v_item.name);
+        dbms_output.put_line(v_item.names || ' - ' || v_item.name);
     end;
     end loop;
     end if;
@@ -188,8 +188,8 @@ begin
     declare
         v_item lazorenko_al.t_hospital_info :=v_arr_hospital_info(i);
     begin
-        dbms_output.put_line(v_item.hname || ' '|| v_item.aname || ' '|| v_item.doctor_id
-                                 || ' '|| v_item.ownership_type || ' '|| v_item.end_time);
+        dbms_output.put_line('название больницы - ' || v_item.hname || '; сейчас '|| v_item.aname ||'; число докторов указанной специальности=' || v_item.doctor_id
+                                 ||chr(10)||'; форма собственности - '|| v_item.ownership_type || '; закрывается в ' || v_item.end_time);
     end;
     end loop;
     end if;
@@ -254,7 +254,7 @@ begin
     declare
         v_item lazorenko_al.t_doctors_detailed :=v_arr_doctors_detailed(i);
     begin
-        dbms_output.put_line(v_item.dname || ' '|| v_item.sname || ' '|| v_item.qualification);
+        dbms_output.put_line('ФИО врача - ' || v_item.dname ||'; специальность - '|| v_item.sname || '; квалификация - ' || v_item.qualification);
     end;
     end loop;
     end if;
@@ -313,7 +313,8 @@ begin
     declare
         v_item lazorenko_al.t_ticket :=v_arr_ticket(i);
     begin
-        dbms_output.put_line(v_item.ticket_id || ' '|| v_item.name || ' '|| v_item.appointment_beg || ' '|| v_item.appointment_end);
+        dbms_output.put_line('id талона - ' ||v_item.ticket_id || '; врач - ' || v_item.name ||'; начало приёма - '||
+                             v_item.appointment_beg || '; конец приёма - ' || v_item.appointment_end);
     end;
     end loop;
     end if;
@@ -378,7 +379,9 @@ begin
     declare
         v_item lazorenko_al.t_records :=v_arr_records(i);
     begin
-        dbms_output.put_line(v_item.last_name || ' '|| v_item.first_name || ' '|| v_item.petronymic || ' '|| v_item.name || ' '|| v_item.rname || ' '|| v_item.appointment_beg || ' '|| v_item.appointment_end);
+        dbms_output.put_line('-пациент - '||v_item.last_name ||' '|| v_item.first_name || ' '|| v_item.petronymic
+                                 || '; врач - ' || v_item.name || '; статус записи - ' || v_item.rname ||chr(10)||'; начало приёма - '
+                                 || v_item.appointment_beg || '; конец приёма - ' || v_item.appointment_end);
     end;
     end loop;
     end if;
