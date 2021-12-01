@@ -12,24 +12,29 @@ create or replace type lazorenko_al.t_arr_city_with_regions as table of lazorenk
 
 --запрос
 create or replace function lazorenko_al.get_cities_regions_with_own_type(
-p_region_id in number default null)
-
+    p_region_id in number default null
+)
 return lazorenko_al.t_arr_city_with_regions
 as
     arr_city_with_regions lazorenko_al.t_arr_city_with_regions:=lazorenko_al.t_arr_city_with_regions();
 
 begin
+
     select lazorenko_al.t_city_with_regions(
         city_id => c.city_id,
         names => c.names,
         region_id => c.region_id,
         name =>r.name)
-
     bulk collect into arr_city_with_regions
-    from lazorenko_al.city c inner join lazorenko_al.region r on c.region_id=r.region_id
-    where p_region_id=c.region_id or p_region_id is null;
+
+    from lazorenko_al.city c
+    inner join lazorenko_al.region r on c.region_id=r.region_id
+
+    where p_region_id=c.region_id
+          or p_region_id is null;
 
 return arr_city_with_regions;
+
 end;
 
 --вывод
@@ -64,10 +69,13 @@ create or replace type lazorenko_al.t_arr_specs as table of lazorenko_al.t_specs
 
 --запрос
 create or replace function lazorenko_al.get_specs_with_own_types(
-p_doctor_id in number default null,
-p_hospital_id in number default null)
+    p_doctor_id in number default null,
+    p_hospital_id in number default null
+)
 return lazorenko_al.t_arr_specs
-as arr_specs lazorenko_al.t_arr_specs :=lazorenko_al.t_arr_specs();
+as
+    arr_specs lazorenko_al.t_arr_specs :=lazorenko_al.t_arr_specs();
+
 begin
 
     select lazorenko_al.t_specs(
@@ -82,6 +90,7 @@ begin
           and (p_doctor_id=doctor_id or p_doctor_id is null);
 
 return arr_specs;
+
 end;
 
 --вывод
@@ -122,9 +131,11 @@ create or replace type lazorenko_al.t_arr_hospital_info as table of lazorenko_al
 --запрос
 
 create or replace function lazorenko_al.get_doctors_specs_with_own_types(
-    p_spec_id number)
+    p_spec_id number
+)
 return lazorenko_al.t_arr_hospital_info
-as arr_hospital_info lazorenko_al.t_arr_hospital_info:=lazorenko_al.t_arr_hospital_info();
+as
+    arr_hospital_info lazorenko_al.t_arr_hospital_info:=lazorenko_al.t_arr_hospital_info();
 begin
     select lazorenko_al.t_hospital_info(
         hname => h.name,
@@ -158,7 +169,9 @@ begin
              when w.end_time>TO_CHAR(sysdate, 'hh24:mi:ss') then 1
              else 0
              end desc;
-    return arr_hospital_info;
+
+return arr_hospital_info;
+
 end;
 
 --вывод
@@ -198,11 +211,14 @@ create or replace type lazorenko_al.t_arr_doctors_detailed as table of lazorenko
 --запрос
 create or replace function lazorenko_al.get_doctor_with_own_types(
     p_hospital_id in number,
-    p_zone_id in number)
+    p_zone_id in number
+)
 return lazorenko_al.t_arr_doctors_detailed
-as arr_doctors_detailed lazorenko_al.t_arr_doctors_detailed:=lazorenko_al.t_arr_doctors_detailed();
+as
+    arr_doctors_detailed lazorenko_al.t_arr_doctors_detailed:=lazorenko_al.t_arr_doctors_detailed();
 
 begin
+
     select lazorenko_al.t_doctors_detailed(
         dname => d.name,
         sname => s.name,
@@ -221,6 +237,7 @@ begin
              else 0 end desc;
 
 return arr_doctors_detailed;
+
 end;
 
 --вывод
@@ -259,10 +276,14 @@ create or replace type lazorenko_al.t_arr_ticket as table of lazorenko_al.t_tick
 --запрос
 
 create or replace function lazorenko_al.get_ticket_with_own_types(
-    p_doctor_id number)
+    p_doctor_id number
+)
 return lazorenko_al.t_arr_ticket
-as arr_ticket lazorenko_al.t_arr_ticket:=lazorenko_al.t_arr_ticket();
+as
+    arr_ticket lazorenko_al.t_arr_ticket:=lazorenko_al.t_arr_ticket();
+
 begin
+
     select lazorenko_al.t_ticket(
         ticket_id => t.ticket_id,
         name => d.name,
@@ -272,7 +293,9 @@ begin
     from ticket t right join doctor d using(doctor_id)
     where (doctor_id=p_doctor_id or p_doctor_id is null) and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
     order by t.appointment_beg;
+
 return arr_ticket;
+
 end;
 
 
@@ -314,10 +337,14 @@ create or replace type lazorenko_al.t_arr_records as table of lazorenko_al.t_rec
 --запрос
 create or replace function lazorenko_al.get_records_with_own_types(
     p_patient_id in number default null,
-    p_record_stat_id in number default null)
+    p_record_stat_id in number default null
+)
 return lazorenko_al.t_arr_records
-as  arr_records lazorenko_al.t_arr_records:=lazorenko_al.t_arr_records();
+as
+    arr_records lazorenko_al.t_arr_records:=lazorenko_al.t_arr_records();
+
 begin
+
     select lazorenko_al.t_records(
         last_name => last_name,
         first_name => first_name,

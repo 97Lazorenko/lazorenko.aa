@@ -1,3 +1,4 @@
+--ССЗДАНИЕ ТИПА, ВОЗВРАЩАЕМОГО ФУНКЦИЯМИ ЗАПИСИ И ОТМЕНЫ
 create or replace type lazorenko_al.t_result as object(
     result_value number);
 
@@ -20,6 +21,8 @@ as
         return;
     end;
 end;
+
+
 
 --ПАКЕТ С ФУНКЦИЯМИ ЗАПИСИ И ОТМЕНЫ ЗАПИСИ С ОТЛОВОМ ОШИЮОК И ЛОГИРОВАНИЕМ
 create or replace package lazorenko_al.pkg_write_or_cancel
@@ -88,16 +91,10 @@ as
         else
 
             insert into lazorenko_al.records(record_id, record_stat_id, patient_id, ticket_id)
-
             values (default, lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_first, p_patient_id, p_ticket_id);
-
 
             update lazorenko_al.ticket t set t.ticket_stat_id=lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_second
             where t.ticket_id=p_ticket_id;
-
-          -- v_result:=1;
-
-          -- return v_result;
 
         end if;
 
@@ -124,11 +121,8 @@ as
             update lazorenko_al.records r set r.record_stat_id=lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_second
             where r.ticket_id=p_ticket_id;
 
-
         if sql%notfound then
-
         raise_application_error(-20500,'указан неверный талон');
-
         end if;
 
         v_result:=lazorenko_al.t_result(result_value  => 1);
@@ -161,6 +155,8 @@ end;
 
 ----------------------------------------------------ИСПОЛЬЗОВАНИЕ-------------------------------------------------------
 
+--ОБЕ ФУНКЦИИ МОГУТ ВОЗВРАЩАТЬ 1 В СЛУЧАЕ УСПЕХА И 0 В СЛУЧАЕ ПРОВАЛА
+
 --ЗАПИСЬ
 declare
     v_patient number :=null;
@@ -178,14 +174,14 @@ end;
 
 --ОТМЕНА ЗАПИСИ
 declare
-    v_ticket number :=33;
-    v_result number;
+    v_ticket number :=null;
+    v_result lazorenko_al.t_result;
 begin
    v_result:=lazorenko_al.pkg_write_or_cancel.cancel_record(
         p_ticket_id => v_ticket
     );
     commit;
-   dbms_output.put_line(v_result);
+   dbms_output.put_line(v_result.result_value);
 end;
 
 
@@ -194,16 +190,21 @@ end;
 -------------------------------------CHECK-ФУНКЦИЯ С ОБРАБОТКОЙ И ЛОГИРОВАНИЕМ ОШИБОК-----------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 create or replace function lazorenko_al.ticket_is_real(
-    p_ticket_id in number)
-return boolean as
+    p_ticket_id in number
+)
+return boolean
+as
     v_count number;
 
-    begin
+begin
+
     select t.ticket_id
     into v_count
     from lazorenko_al.ticket t
     where t.ticket_id=p_ticket_id;
+
     return v_count>0;
+
     exception
         when no_data_found
         then lazorenko_al.add_error_log(
@@ -216,16 +217,19 @@ return boolean as
 
             dbms_output.put_line('такого талона не существует');
 
-        return false;
-    end;
+    return false;
+
+end;
 
 
 
 
 create or replace function check_age(
     p_patient_id in number,
-    p_spec_id in number)
-return boolean as
+    p_spec_id in number
+)
+return boolean
+as
     v_patient lazorenko_al.t_patient;
     v_age number;
     v_count number;
@@ -233,23 +237,24 @@ return boolean as
     e_wrong_age exception;
     pragma exception_init (e_wrong_age, -20400);
 
-    begin
+begin
 
     v_patient:=lazorenko_al.get_patient_info_by_id(p_patient_id);
     v_age:=lazorenko_al.calculate_age_from_date(v_patient.born_date);
 
-        select count(*)
-        into v_count
-        from lazorenko_al.specialisation s
-        where s.spec_id = p_spec_id
-              and (s.min_age <= v_age or s.min_age is null)
-              and (s.max_age >= v_age or s.max_age is null);
+    select count(*)
+    into v_count
+    from lazorenko_al.specialisation s
+    where s.spec_id = p_spec_id
+          and (s.min_age <= v_age or s.min_age is null)
+          and (s.max_age >= v_age or s.max_age is null);
 
     if v_count=0 then
        raise_application_error (-20400, 'возраст пациента не соответствует возрасту специальности');
-
     end if;
-        return v_count>0;
+
+    return v_count>0;
+
     exception
 
         when e_wrong_age then
@@ -263,15 +268,17 @@ return boolean as
 
             dbms_output.put_line('возраст пациента не соответствует возрасту специальности');
 
-        return false;
+    return false;
 
-    end;
+end;
 
 
-    create or replace function sex_check(
+create or replace function sex_check(
     p_patient_id in number,
-    p_spec_id in number)
-    return boolean as
+    p_spec_id in number
+)
+return boolean
+    as
     v_sex number;
     v_patient lazorenko_al.t_patient;
     v_count number;
@@ -280,20 +287,25 @@ return boolean as
     pragma exception_init (e_wrong_sex, -20401);
 
 
-    begin
+
+begin
+
     v_patient:=lazorenko_al.get_patient_info_by_id(p_patient_id);
     v_sex:=v_patient.sex_id;
     select count(*)
     into v_count
     from lazorenko_al.specialisation s
-    where s.spec_id=p_spec_id and (s.sex_id=v_sex or s.sex_id is null);
+    where s.spec_id=p_spec_id
+          and (s.sex_id=v_sex or s.sex_id is null);
+
     if v_count=0 then
        raise_application_error (-20401, 'пол пациента не соответствует полу специальности');
     return v_count>0;
     end if;
-        return v_count>0;
-    exception
 
+    return v_count>0;
+
+    exception
         when e_wrong_sex then
             lazorenko_al.add_error_log(
     $$plsql_unit_owner||'.'||$$plsql_unit,
@@ -305,32 +317,36 @@ return boolean as
 
             dbms_output.put_line('пол пациента не соответствует полу специальности');
 
-        return false;
+    return false;
 
-    end;
+end;
 
 
-    create or replace function patient_doc_check(
-    p_patient_id in number)
-    return boolean as
+create or replace function patient_doc_check(
+    p_patient_id in number
+)
+return boolean
+as
     v_count number;
 
     e_no_docs exception;
     pragma exception_init (e_no_docs, -20402);
 
-    begin
+begin
     select count(*)
     into v_count
     from lazorenko_al.documents_numbers dn
     where dn.patient_id=p_patient_id and dn.document_id=4
           and dn.value is not null;
+
     if v_count=0 then
        raise_application_error (-20402, 'отсутствуют данные по полису ОМС');
     return v_count>0;
     end if;
-        return v_count>0;
-    exception
 
+    return v_count>0;
+
+    exception
         when e_no_docs then
             lazorenko_al.add_error_log(
     $$plsql_unit_owner||'.'||$$plsql_unit,
@@ -342,44 +358,20 @@ return boolean as
 
             dbms_output.put_line('отсутствуют данные по полису ОМС');
 
-        return false;
+    return false;
 
     end;
 
---ПРИМЕНЕНИЕ ФУНКЦИИ - ВВОДИМ ID ПАЦИЕНТА, ОТСУТСТВУЮЩЕГО В БД
-
-declare
-    v_check number;
-begin
-    v_check:=sys.diutil.bool_to_int(lazorenko_al.check_age(
-    10,6));
-
-    dbms_output.put_line(v_check);
-
-end;
-
---ПРИМЕНЕНИЕ ФУНКЦИИ - ВВОДИМ ID ПАЦИЕНТА, НЕ ОТВЕЧАЮЩЕГО ВОЗРАСТНЫМ ОГРАНИЧЕНИЯМ ПО СПЕЦИАЛЬНОСТИ
-
-declare
-    v_check number;
-begin
-    v_check:=sys.diutil.bool_to_int(lazorenko_al.check_age(
-    7,6));
-
-    dbms_output.put_line(v_check);
-
-end;
-
 
 ------------------------------------------------------------------------------------------------------------------------
--------ФУНКЦИЯ, ВКЛЮЧАЮЩАЯ В СЕБЯ РАЗЛИЧНЫЕ ПРОВЕРКИ ПЕРЕД ЗАПИСЬЮ (БУДЕМ ИСПОЛЬЗОВАТЬ ТОЛЬКО ОДНУ ДЛЯ ПРИМЕРА)---------
+-------ФУНКЦИЯ, ВКЛЮЧАЮЩАЯ В СЕБЯ РАЗЛИЧНЫЕ ПРОВЕРКИ ПЕРЕД ЗАПИСЬЮ------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 
 create or replace function lazorenko_al.check_for_accept_with_exceptions(
     p_ticket_id number,
     p_patient_id in number,
     p_spec_id number
-    )
+)
 return boolean
 as
     v_result boolean := true;
@@ -417,10 +409,11 @@ as
 declare
     v_check number;
 begin
-    v_check:=sys.diutil.bool_to_int(lazorenko_al.check_for_accept_with_exceptions(330, 1, 2));
+    v_check:=sys.diutil.bool_to_int(lazorenko_al.check_for_accept_with_exceptions(330, 7, 6));
 
     dbms_output.put_line(v_check);
 end;
+
 ------------------------------------------------------------------------------------------------------------------------
 ----------------------ИТОГВАЯ ФУНКЦИЯ ЗАПИСИ ПОСЛЕ ПРОВЕРКИ УСЛОВИЙ-----------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
@@ -456,7 +449,7 @@ declare
     v_result lazorenko_al.t_result;
 begin
     v_result:=lazorenko_al.t_result(result_value => lazorenko_al.accept_record_by_rules_with_exceptions(
-    33, 3, 6, true));
+    330, 7, 6, true));
 
     commit;
     dbms_output.put_line(v_result.result_value);
