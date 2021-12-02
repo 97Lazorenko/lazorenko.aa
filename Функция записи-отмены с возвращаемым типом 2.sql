@@ -224,7 +224,7 @@ end;
 
 
 
-create or replace function check_age(
+create or replace function lazorenko_al.check_age(
     p_patient_id in number,
     p_spec_id in number
 )
@@ -273,7 +273,7 @@ begin
 end;
 
 
-create or replace function sex_check(
+create or replace function lazorenko_al.sex_check(
     p_patient_id in number,
     p_spec_id in number
 )
@@ -322,7 +322,7 @@ begin
 end;
 
 
-create or replace function patient_doc_check(
+create or replace function lazorenko_al.patient_doc_check(
     p_patient_id in number
 )
 return boolean
@@ -363,6 +363,164 @@ begin
     end;
 
 
+    create or replace function lazorenko_al.ticket_check(
+    p_ticket_id in number,
+    p_patient_id number
+    )
+    return boolean
+    as
+    v_count number;
+
+    e_record_exists exception;
+    pragma exception_init (e_record_exists, -20403);
+
+    begin
+    select count(*)
+    into v_count
+    from lazorenko_al.records r right join lazorenko_al.ticket t on r.ticket_id=t.ticket_id
+
+    where (r.ticket_id=p_ticket_id and r.record_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_2
+                                   /*and (r.patient_id=p_patient_id or r.patient_id<>p_patient_id)*/)
+          or (r.ticket_id=p_ticket_id and r.record_stat_id in (lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_1, lazorenko_al.pkg_ticket_parameters_check.c_rec_stat_constant_3)
+          and r.patient_id<>p_patient_id)
+          or (t.ticket_id=p_ticket_id and r.ticket_id is null and r.patient_id is null);
+
+        if v_count=0 then
+       raise_application_error (-20403, 'Вы уже записаны на данный талон');
+
+    return v_count>0;
+    end if;
+
+    return v_count>0;
+
+    exception
+        when e_record_exists then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' || p_ticket_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('Вы уже записаны на данный талон');
+
+    return false;
+
+    end;
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.ticket_check(
+    31, 2)); --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
+dbms_output.put_line(v_check);
+end;
+
+
+    create or replace function lazorenko_al.ticket_status_check(
+    p_ticket_id in number,
+    p_patient_id number
+    )
+    return boolean
+    as
+    v_count number;
+
+    e_wrong_status exception;
+    pragma exception_init (e_wrong_status, -20404);
+
+    begin
+    select count(*)
+    into v_count
+    from lazorenko_al.ticket t left join lazorenko_al.records r on r.ticket_id=t.ticket_id
+    where (t.ticket_id=p_ticket_id and t.ticket_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_tick_stat_constant_1)
+          or (t.ticket_id=p_ticket_id and t.ticket_stat_id=lazorenko_al.pkg_ticket_parameters_check.c_tick_stat_constant_2
+                                      and r.patient_id=p_patient_id);
+
+        if v_count=0 then
+        raise_application_error (-20404, 'Талон закрыт');
+
+        return v_count>0;
+        end if;
+
+    return v_count>0;
+
+    exception
+        when e_wrong_status then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' || p_ticket_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('Талон закрыт');
+
+    return false;
+
+    end;
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.ticket_status_check(
+    31, 2)); --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
+dbms_output.put_line(v_check);
+end;
+
+
+    create or replace function lazorenko_al.time_check(
+    p_ticket_id in number
+    )
+    return boolean
+    as
+    v_appointment_beg varchar2(100);
+    v_count number;
+
+    e_wrong_time exception;
+    pragma exception_init (e_wrong_time, -20405);
+
+    begin
+    v_appointment_beg:=lazorenko_al.appointment_beg_determine(p_ticket_id);
+    select count(*)
+    into v_count
+    from lazorenko_al.ticket t
+    where t.ticket_id=p_ticket_id and v_appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss');
+
+        if v_count=0 then
+        raise_application_error (-20405, 'Приём уже завершён');
+
+        return v_count>0;
+        end if;
+
+    return v_count>0;
+
+    exception
+        when e_wrong_time then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' || p_ticket_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('Приём уже завершён');
+
+    return false;
+
+    end;
+
+
+declare
+v_check number;
+begin
+v_check:=sys.diutil.bool_to_int(lazorenko_al.time_check(
+    99)); --ПРОВЕРКА ПОВТОРНОЙ ЗАПИСИ
+dbms_output.put_line(v_check);
+end;
+
 ------------------------------------------------------------------------------------------------------------------------
 -------ФУНКЦИЯ, ВКЛЮЧАЮЩАЯ В СЕБЯ РАЗЛИЧНЫЕ ПРОВЕРКИ ПЕРЕД ЗАПИСЬЮ------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
@@ -377,10 +535,20 @@ as
     v_result boolean := true;
 
     begin
+    if lazorenko_al.get_patient_info_by_id( ---------------------------------------------------
+        p_patient_id => p_patient_id
+        ) is null
+    then v_result:=false;
+    return v_result;
+    end if;--------------------------------------------------------------------------------------
+
     if (not lazorenko_al.ticket_is_real(
         p_ticket_id => p_ticket_id
         ))
     then v_result:=false;
+    if v_result=false
+    then return v_result;
+    end if;
     end if;
 
     if (not lazorenko_al.check_age(

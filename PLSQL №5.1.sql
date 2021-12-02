@@ -432,7 +432,7 @@ declare
 v_check number;
 begin
 v_check:=sys.diutil.bool_to_int(lazorenko_al.pkg_parameters_check.check_IN_parameters(
-    5, 3, 2, 33)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
+    99, 3, 99, 33)); --ПРОВЕРКА ВВОДИМЫХ ДЛЯ ЗАПИСИ ПАРАМЕТРОВ (ИХ СООТВЕТСТВИЯ ДРУГ ДРУГУ)
 dbms_output.put_line(v_check);
 end;
 
