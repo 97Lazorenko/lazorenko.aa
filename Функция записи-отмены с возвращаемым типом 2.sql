@@ -221,6 +221,54 @@ begin
 
 end;
 
+create or replace function lazorenko_al.get_ticket_info_by_id(
+    p_ticket_id number
+)
+return lazorenko_al.t_tickets
+as
+    v_ticket lazorenko_al.t_tickets;
+begin
+    select lazorenko_al.t_tickets(
+    ticket_id => t.ticket_id,
+    doctor_id => t.doctor_id,
+    ticket_stat_id => t.ticket_stat_id,
+    appointment_beg => t.appointment_beg,
+    appointment_end => t.appointment_end
+    )
+    into v_ticket
+    from lazorenko_al.ticket t
+    where t.ticket_id = p_ticket_id;
+
+
+    return v_ticket;
+
+    exception
+        when no_data_found
+        then lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' || p_ticket_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('такого талона не существует');
+
+    return null;
+
+end;
+
+
+declare
+    v_ticket lazorenko_al.t_tickets;
+begin
+    v_ticket:=lazorenko_al.get_ticket_info_by_id(
+    330); --ПРОВЕРКА ВОЗРАСТА
+
+    dbms_output.put_line(v_ticket.doctor_id);
+
+end;
+
 
 
 
@@ -542,15 +590,6 @@ as
     return v_result;
     end if;--------------------------------------------------------------------------------------
 
-    if (not lazorenko_al.ticket_is_real(
-        p_ticket_id => p_ticket_id
-        ))
-    then v_result:=false;
-    if v_result=false
-    then return v_result;
-    end if;
-    end if;
-
     if (not lazorenko_al.check_age(
         p_patient_id => p_patient_id,
         p_spec_id => p_spec_id
@@ -569,6 +608,15 @@ as
         p_patient_id => p_patient_id
         ))
     then v_result:=false;
+    end if;
+
+    if lazorenko_al.get_ticket_info_by_id(
+        p_ticket_id => p_ticket_id
+        ) is null
+    then v_result:=false;
+    if v_result=false
+    then return v_result;
+    end if;
     end if;
 
     return v_result;

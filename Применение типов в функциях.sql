@@ -1,6 +1,6 @@
 
 
-create or replace function get_patient_info_by_id(
+create or replace function lazorenko_al.get_patient_info_by_id(
     p_patient_id number
 )
 return lazorenko_al.t_patient
@@ -25,14 +25,14 @@ begin
         lazorenko_al.add_error_log(
     $$plsql_unit_owner||'.'||$$plsql_unit,
         '{"error":"' || sqlerrm
-                  ||'","value":"' || p_patient_id
+                  ||'","value":"' ||'","patient_id":"' || p_patient_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
                   ||'"}'
         );
 
         dbms_output.put_line('данный пациент отсутствует в базе больницы');
 
-   return v_patient;
+   return null;
 
 end;
 
@@ -52,7 +52,7 @@ end;
 ------------------------------------------------------------------------------------------------------------------------
 
 --Проверка пола
-create or replace function sex_check(
+create or replace function lazorenko_al.sex_check(
     p_patient_id in number,
     p_spec_id in number
 )
@@ -77,7 +77,7 @@ begin
 end;
 
 --Проверка возраста
-create or replace function check_age(
+create or replace function lazorenko_al.check_age(
     p_patient_id in number,
     p_spec_id in number
 )

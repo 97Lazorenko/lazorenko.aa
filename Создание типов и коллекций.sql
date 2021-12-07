@@ -136,4 +136,33 @@ create or replace type lazorenko_al.t_record as object(  --вместо row%type
 
 create or replace type lazorenko_al.t_arr_record as table of lazorenko_al.t_record;  --массив
 
+alter type lazorenko_al.t_tickets  --добавление собственного конструктора
+add constructor function t_tickets(
+    ticket_id number,
+    doctor_id number,
+    ticket_stat_id number,
+    appointment_beg varchar2,
+    appointment_end varchar2
+) return self as result
+cascade;
 
+create or replace type body lazorenko_al.t_tickets  --его тело
+as
+    constructor function t_tickets(
+    ticket_id number,
+    doctor_id number,
+    ticket_stat_id number,
+    appointment_beg varchar2,
+    appointment_end varchar2
+    )
+    return self as result
+    as
+    begin
+        self.ticket_id := ticket_id;
+        self.doctor_id:= doctor_id;
+        self.ticket_stat_id := ticket_stat_id;
+        self.appointment_beg := appointment_beg;
+        self.appointment_end := appointment_end;
+        return;
+    end;
+end;

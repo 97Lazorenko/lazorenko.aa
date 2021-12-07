@@ -265,13 +265,13 @@ end;
 --ЗАПРОС 5
 
 --создание типов
-create or replace type lazorenko_al.t_ticket as object(
+create or replace type lazorenko_al.t_ticket1 as object(
     ticket_id number,
     name varchar2(100),
     appointment_beg varchar2(50),
     appointment_end varchar2(50));
 
-create or replace type lazorenko_al.t_arr_ticket as table of lazorenko_al.t_ticket;
+create or replace type lazorenko_al.t_arr_ticket as table of lazorenko_al.t_ticket1;
 
 --запрос
 
@@ -284,7 +284,7 @@ as
 
 begin
 
-    select lazorenko_al.t_ticket(
+    select lazorenko_al.t_ticket1(
         ticket_id => t.ticket_id,
         name => d.name,
         appointment_beg => t.appointment_beg,
@@ -311,7 +311,7 @@ begin
     for i in v_arr_ticket.first..v_arr_ticket.last
     loop
     declare
-        v_item lazorenko_al.t_ticket :=v_arr_ticket(i);
+        v_item lazorenko_al.t_ticket1 :=v_arr_ticket(i);
     begin
         dbms_output.put_line('id талона - ' ||v_item.ticket_id || '; врач - ' || v_item.name ||'; начало приёма - '||
                              v_item.appointment_beg || '; конец приёма - ' || v_item.appointment_end);
