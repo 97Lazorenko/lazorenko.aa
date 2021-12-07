@@ -884,10 +884,224 @@ declare
     v_result lazorenko_al.t_result;
 begin
     v_result:=lazorenko_al.t_result(result_value => lazorenko_al.accept_record_by_rules_with_exceptions(
-    33, 7, 3, 3, 4, true));
+    33, 1, 3, 3, 4, true));
 
     commit;
     dbms_output.put_line(v_result.result_value);
 end;
 
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+---------------------------------ФУНКЦИИ ПРОВЕРКИ УСЛОВИЙ, ОТМЕНЫ ЗАПИСИ И ИТОГОВАЯ ФУНКЦИЯ-----------------------------
+-----------------------------------------------------------------------------------------------------------------------
+
+--ФУНКЦИЯ ПРОВЕРКИ ВРЕМЕННЫХ ОГРАНИЧЕНИЙ
+
+create or replace function lazorenko_al.hospital_time_check(
+    p_hospital_id in number
+)
+return boolean
+as
+    v_count number;
+
+    e_bad_time exception;
+    pragma exception_init (e_bad_time, -20300);
+
+begin
+    select count(*)
+    into v_count
+    from lazorenko_al.work_time w
+    where w.end_time>(TO_CHAR(sysdate+1/12, 'hh24:mi'))
+    and w.day in (to_char(sysdate, 'd')) and w.hospital_id=p_hospital_id;
+
+        if v_count=0 then
+        raise_application_error (-20300, 'ошибка - запись можжно отменить не позднее, чем за 2 часа до закрытия больницы');
+        end if;
+
+return v_count>0;
+
+    exception
+
+        when e_bad_time then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' ||'","hospital_id":"' || p_hospital_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('ошибка - запись можжно отменить не позднее, чем за 2 часа до закрытия больницы');
+
+return false;
+
+end;
+
+
+
+--ФУНКЦИЯ ПРОВЕРКИ ВРЕМЕНИ ПРИЁМА
+
+create or replace function lazorenko_al.ticket_time_check(
+    p_ticket_id in number
+)
+return boolean
+as
+    v_count number;
+
+    e_old_ticket exception;
+    pragma exception_init (e_old_ticket, -20301);
+
+begin
+
+    select count(*)
+    into v_count
+    from lazorenko_al.ticket t
+    where to_date(appointment_beg, 'yyyy-mm-dd hh24:mi:ss')>sysdate
+          and t.ticket_id=p_ticket_id;
+
+        if v_count=0 then
+        raise_application_error (-20301, 'невозможно оменить устаревший талон');
+        end if;
+
+return v_count>0;
+
+    exception
+
+        when e_old_ticket then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' ||'","ticket_id":"' || p_ticket_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('невозможно оменить устаревший талон');
+
+return false;
+
+end;
+
+
+--ФУНКЦИЯ ПРОВЕРКИ ВВОДИМЫХ ПРИ ОТМЕНЕ ЗАПИСИ ПАРАМЕТРОВ
+
+create or replace function lazorenko_al.check_accordance_for_cancel(
+    p_patient_id in number,
+    p_ticket_id in number
+    )
+return boolean
+    as
+    v_count number;
+
+    e_bad_accordance exception;
+    pragma exception_init (e_bad_accordance, -20302);
+
+begin
+
+    select count(*)
+    into v_count
+    from lazorenko_al.records r
+    where r.patient_id=p_patient_id and r.ticket_id=p_ticket_id and r.record_stat_id=1;
+
+        if v_count=0 then
+        raise_application_error (-20302, 'у вас отсутствует действующий талон с подобными параметрами или талон закрыт');
+        end if;
+
+return v_count>0;
+
+    exception
+
+        when e_bad_accordance then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' ||'","patient_id":"' || p_patient_id ||'","ticket_id":"' || p_ticket_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('у вас отсутствует действующий талон с подобными параметрами или талон закрыт');
+
+return false;
+
+end;
+
+
+--ФУНКЦИЯ ПРОВЕРКИ УСЛОВИЙ ПЕРЕД ОТМЕНОЙ
+
+create or replace function lazorenko_al.check_cancel(
+    p_hospital_id in number,
+    p_ticket_id in number,
+    p_patient_id in number
+)
+return boolean
+as
+    v_result boolean := true;
+begin
+    if (not lazorenko_al.check_accordance_for_cancel(
+    p_patient_id => p_patient_id,
+    p_ticket_id => p_ticket_id
+    )) then v_result:=false;
+    return v_result;
+    end if;
+
+    if (not lazorenko_al.ticket_time_check(
+    p_ticket_id => p_ticket_id
+    )) then v_result:=false;
+    end if;
+
+    if (not lazorenko_al.hospital_time_check(
+    p_hospital_id => p_hospital_id
+    )) then v_result:=false;
+    end if;
+
+return v_result;
+end;
+
+
+--ОТМЕНА ЗАПИСИ ПО УСЛОВИЯМ
+
+
+create or replace function lazorenko_al.cancel_record_by_rules(
+    v_ticket_id number,
+    v_patient_id number,
+    v_hospital_id number
+)
+return  number
+as
+    v_result lazorenko_al.t_result;
+begin
+    if (lazorenko_al.check_cancel(
+    p_ticket_id => v_ticket_id,
+    p_patient_id => v_patient_id,
+    p_hospital_id => v_hospital_id))
+    then v_result:=lazorenko_al.pkg_write_or_cancel.cancel_record(p_ticket_id => v_ticket_id);
+
+
+        else v_result:=lazorenko_al.t_result(result_value =>0);
+
+    end if;
+
+return v_result.result_value;
+
+end;
+
+
+--ПРИМЕНЕНИЕ МЕТОДА ОТМЕНЫ ЗАПИСИ
+
+declare
+    v_result lazorenko_al.t_result;
+begin
+    v_result:=lazorenko_al.t_result(result_value => lazorenko_al.cancel_record_by_rules(
+    33, 1, 4));
+
+    commit;
+    dbms_output.put_line(v_result.result_value);
+
+end;
 
