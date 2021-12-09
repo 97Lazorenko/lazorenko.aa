@@ -5,8 +5,7 @@ create or replace function lazorenko_al.json_record(
     p_patient_id number,
     p_spec_id number,
     p_doctor_id number,
-    p_hospital_id number,
-    p_need_handle boolean
+    p_hospital_id number
 )
 return clob
 as
@@ -25,7 +24,6 @@ begin
         p_spec_id => p_spec_id,
         p_doctor_id => p_doctor_id,
         p_hospital_id => p_hospital_id,
-        p_need_handle => p_need_handle,
         out_fail => v_result
     );
 
@@ -55,14 +53,13 @@ end;
 
 
 --его применение
-
 declare
 
-    v_clob clob;
+v_clob clob;
 
 begin
 
-    v_clob := lazorenko_al.json_record(33, 3, 3, 3, 4, true);
+    v_clob := lazorenko_al.json_record(33, 3, 3, 3, 4);
 
     dbms_output.put_line(v_clob);
 
