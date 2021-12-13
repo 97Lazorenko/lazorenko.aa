@@ -672,7 +672,7 @@ as
     function get_patient_info_by_id(
     p_patient_id number
     )
-    return lazorenko_al.t_patient;
+    return lazorenko_al.t_patient1;
 
     function check_age(
     p_patient_id in number,
@@ -698,16 +698,21 @@ as
     function get_patient_info_by_id(
     p_patient_id number
     )
-    return lazorenko_al.t_patient
+    return lazorenko_al.t_patient1
     as
-    v_patient lazorenko_al.t_patient;
+    v_patient lazorenko_al.t_patient1;
 
     begin
 
-        select lazorenko_al.t_patient(
+        select lazorenko_al.t_patient1(
             patient_id => p.patient_id,
+            last_name => p.last_name,
+            first_name => p.first_name,
+            petronymic => p.petronymic,
             born_date => p.born_date,
-            sex_id => p.sex_id
+            tel_number => p.tel_number,
+            sex_id => p.sex_id,
+            zone_id => p.zone_id
         )
         into v_patient
         from lazorenko_al.patient p
@@ -736,7 +741,7 @@ as
     )
     return boolean
     as
-    v_patient lazorenko_al.t_patient;
+    v_patient lazorenko_al.t_patient1;
     v_age number;
     v_count number;
 
@@ -786,7 +791,7 @@ as
     return boolean
     as
     v_sex number;
-    v_patient lazorenko_al.t_patient;
+    v_patient lazorenko_al.t_patient1;
     v_count number;
 
     e_wrong_sex exception;
