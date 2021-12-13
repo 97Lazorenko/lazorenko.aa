@@ -27,7 +27,7 @@ as
 
 begin
 
-    v_clob := lazorenko_al.pkg_doctor_repository.repository(
+    v_clob := lazorenko_al.pkg_doctor_remote_repository.get_doctors_remote(
         out_result => v_result
     );
 
@@ -97,7 +97,7 @@ as
 
 begin
 
-    v_clob := lazorenko_al.pkg_hospital_repository.repository_hospitals(
+    v_clob := lazorenko_al.pkg_hospital_remote_repository.get_hospitals_remote(
         out_result => v_result
     );
 
@@ -165,7 +165,7 @@ as
 
 begin
 
-    v_clob := lazorenko_al.pkg_specs_repository.repository_specs(
+    v_clob := lazorenko_al.pkg_specs_remote_repository.get_specs_remote(
         out_result => v_result
     );
 

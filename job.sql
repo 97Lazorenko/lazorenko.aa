@@ -445,3 +445,8 @@ begin
 end;
 
 
+begin
+    sys.dbms_scheduler.disable(
+        name      => 'lazorenko_al.job_cache_hospital'
+    );
+end;
