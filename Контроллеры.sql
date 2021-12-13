@@ -131,3 +131,41 @@ begin
 
 end;
 
+
+
+--контроллер - запрос 1
+create or replace function lazorenko_al.json_query_1(
+    p_region_id number
+)
+return clob
+as
+
+    v_response lazorenko_al.t_arr_city_with_regions;
+    v_json json_object_t := json_object_t();
+    v_json_response json_array_t := json_array_t();
+    v_return_clob clob;
+
+begin
+
+    v_response := lazorenko_al.service_for_query_1(
+    p_region_id => p_region_id
+    );
+
+    if v_response.first is not null then
+    declare
+        v_object json_object_t:= json_object_t();
+    begin
+        v_object.put('names', v_response.names);
+        v_object.put('name', v_response.name);
+
+        v_json_response.append(v_object);
+    end;
+    end if;
+
+    v_json.put('response', v_json_response);
+
+    v_return_clob := v_json.to_Clob();
+
+    return v_return_clob;
+
+end;
