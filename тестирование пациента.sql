@@ -58,31 +58,27 @@ as
     --%throws(no_data_found)
     procedure failed_get_by_id;
 
-    --пометка что тест выключен
-    --%test(выключенный тест)
-    --%disabled
-    procedure disabled_test;
+    --пометка что это тест и его нужно запускать
+    --%test(проверка получения по id)
+    procedure check_age;
 
-    --%test(тест на foreign_key id_gender)
-    --%throws(-01400)
-    procedure check_patient_id_gender_constraint;
+    --%test(ошибка получения по id)
+    --%throws(-20400)
+    procedure failed_check_age;
 
-    --%test(тест на foreign_key id_account)
-    --%throws(-01400)
-    procedure check_patient_id_account_constraint;
+    --%test(проверка получения по id)
+    procedure sex_check;
 
-    --%test(тест на surname is not null)
-    --%throws(-01400)
-    procedure check_patient_surname_constraint;
+    --%test(ошибка получения по id)
+    --%throws(-20401)
+    procedure failed_sex_check;
 
-    --
+    --%test(проверка получения по id)
+    procedure doc_check;
 
-    /*
-     процедуры и функции
-     без соответствующей анотации
-     за тесты не считаются
-     */
-    procedure usual_procedure;
+    --%test(ошибка получения по id)
+    --%throws(-20401)
+    procedure failed_doc_check;
 
 end;
 /
@@ -101,17 +97,6 @@ as
     mock_patient_area number;
     --
 
-    procedure disabled_test
-    as
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-    end;
-
-    procedure usual_procedure
-    as
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-    end;
 
     procedure get_by_id
     as
@@ -135,88 +120,72 @@ as
         v_patient := lazorenko_al.pkg_patient_repository.get_patient_info_by_id(-1);
     end;
 
-    procedure check_patient_id_gender_constraint
+    procedure check_age
     as
+        v_result number;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        insert into lazorenko_al.patient(
-            last_name,
-            first_name,
-            petronymic,
-            born_date,
-            tel_number,
-            sex_id,
-            zone_id
-        )
-        values (
-            mock_patient_surname,
-            mock_patient_name,
-            mock_patient_petronymic,
-            mock_patient_date_of_birth,
-            mock_patient_tel,
-            null,
-            mock_patient_area
-        );
+        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_patient_repository.check_age(1, 3));
+
+        TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
     end;
 
-    procedure check_patient_id_account_constraint
+    procedure failed_check_age
     as
+        v_result number;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        insert into lazorenko_al.patient(
-            last_name,
-            first_name,
-            petronymic,
-            born_date,
-            tel_number,
-            sex_id,
-            zone_id
-        )
-        values (
-            mock_patient_surname,
-            mock_patient_name,
-            mock_patient_petronymic,
-            mock_patient_date_of_birth,
-            mock_patient_tel,
-            mock_patient_id_gender,
-            null
-        );
+        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_patient_repository.check_age(7, 3));
     end;
 
-    procedure check_patient_surname_constraint
+    procedure sex_check
     as
+        v_result number;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        insert into lazorenko_al.patient(
-            last_name,
-            first_name,
-            petronymic,
-            born_date,
-            tel_number,
-            sex_id,
-            zone_id
-        )
-        values (
-            null,
-            mock_patient_name,
-            mock_patient_petronymic,
-            mock_patient_date_of_birth,
-            mock_patient_tel,
-            mock_patient_id_gender,
-            mock_patient_area
-        );
+        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_patient_repository.sex_check(3, 6));
+
+        TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
     end;
 
-    --
+    procedure failed_sex_check
+    as
+        v_result number;
+    begin
+        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
+
+        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_patient_repository.sex_check(3, 5));
+    end;
+
+    procedure doc_check
+    as
+        v_result number;
+    begin
+        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
+
+        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_patient_repository.patient_doc_check(3));
+
+        TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
+    end;
+
+    procedure failed_doc_check
+    as
+        v_result number;
+    begin
+        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
+
+        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_patient_repository.patient_doc_check(2));
+    end;
 
     procedure seed_before_all
     as
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
+        mock_id_patient := 1;
         mock_patient_surname := 'surname';
         mock_patient_name := 'name';
         mock_patient_petronymic := 'petronymic';
