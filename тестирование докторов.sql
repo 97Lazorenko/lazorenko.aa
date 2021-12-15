@@ -1,14 +1,8 @@
 
 
 
---нейминг test_имя-тестируемого-обьекта
 create or replace package lazorenko_al.test_pkg_doctor
 as
-    /*
-     нельзя писать комментарии:
-     - на той же строке с аннотацией
-     - между аннотацией и связанной с ней процедурой
-     */
 
 
     --%suite
@@ -33,29 +27,21 @@ as
     procedure print_after_each;
     --запуск после каждого теста
 
-    /*
-     в любом из before/after тригеров
-     можно указать имя другого исполняемого
-     обьекта в БД
-     */
-
-    --
 
     --пометка что это тест и его нужно запускать
-    --%test(проверка получения по id)
+    --%test(проверка на удаление)
     procedure get_by_id_1;
 
-    --%test(проверка получения по id)
+    --%test(получение строки по id)
     procedure get_by_id_2;
 
-    --пометка что успех теста будет сброшенное исключение
-    --допускаются именованные ошибки, системные ошибки, ORA-номер ошибок
+
     --%test(ошибка получения по id)
-    --%throws(no_data_found)
+    --%throws(-20390)
     procedure failed_get_by_id_1;
 
     --%test(ошибка получения по id)
-    --%throws(no_data_found)
+    --%throws(-20660)
     procedure failed_get_by_id_2;
 
 end;
@@ -89,21 +75,21 @@ end;
 
     procedure get_by_id_2
     as
-     v_doctor lazorenko_al.t_arr_doctors_detailed;
+     v_doctor lazorenko_al.t_arr_doctor_detailed;
 begin
     v_doctor := lazorenko_al.pkg_doctor_repository.get_doctor_with_own_types(
-         mock_id_doctor, mock_id_zone);
+         16, 2);
     if v_doctor.count>0 then
     for i in v_doctor.first..v_doctor.last
     loop
     declare
-        v_item lazorenko_al.t_doctors_detailed := v_doctor(i);
+        v_item lazorenko_al.t_doctor_detailed := v_doctor(i);
     begin
     if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
     v_doctor := lazorenko_al.pkg_doctor_repository.get_doctor_with_own_types(
-         mock_id_doctor, mock_id_zone);
+         16, 2);
 
-    TOOL_UT3.UT.EXPECT(v_item.dname).TO_EQUAL(mock_name);
+    TOOL_UT3.UT.EXPECT(v_item.dname).TO_EQUAL('тест');
     end;
     end loop;
     end if;
@@ -122,7 +108,7 @@ end;
 
         procedure failed_get_by_id_2
     as
-        v_doctor lazorenko_al.t_arr_doctors_detailed;
+        v_doctor lazorenko_al.t_arr_doctor_detailed;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
      v_doctor := lazorenko_al.pkg_doctor_repository.get_doctor_with_own_types(
@@ -185,3 +171,7 @@ end;
     end;
 end;
 /
+
+begin
+    TOOL_UT3.UT.RUN('LAZORENKO_AL.TEST_PKG_DOCTOR');
+end;

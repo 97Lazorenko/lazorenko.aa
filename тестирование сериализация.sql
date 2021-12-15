@@ -138,3 +138,7 @@ as
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
     end;
 end;
+
+begin
+    TOOL_UT3.UT.RUN('LAZORENKO_AL.TEST_PKG_JSON');
+end;

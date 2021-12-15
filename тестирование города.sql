@@ -1,15 +1,9 @@
 
 
 
---нейминг test_имя-тестируемого-обьекта
+
 create or replace package lazorenko_al.test_pkg_city
 as
-    /*
-     нельзя писать комментарии:
-     - на той же строке с аннотацией
-     - между аннотацией и связанной с ней процедурой
-     */
-
 
     --%suite
     --пакет относится к тестам
@@ -27,28 +21,15 @@ as
 
     --%beforeeach
     procedure print_before_each;
-    --запуск перед каждым тестом
 
     --%aftereach
     procedure print_after_each;
-    --запуск после каждого теста
 
-    /*
-     в любом из before/after тригеров
-     можно указать имя другого исполняемого
-     обьекта в БД
-     */
-
-    --
-
-    --пометка что это тест и его нужно запускать
-    --%test(проверка получения по id)
+    --%test(проверка получения строки по id)
     procedure get_by_id;
 
-    --пометка что успех теста будет сброшенное исключение
-    --допускаются именованные ошибки, системные ошибки, ORA-номер ошибок
     --%test(ошибка получения по id)
-    --%throws(no_data_found)
+    --%throws(-20388)
     procedure failed_get_by_id;
 
 end;
@@ -137,3 +118,7 @@ end;
     end;
 end;
 /
+
+begin
+    TOOL_UT3.UT.RUN('LAZORENKO_AL.TEST_PKG_CITY');
+end;

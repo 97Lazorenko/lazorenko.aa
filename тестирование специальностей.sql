@@ -25,7 +25,7 @@ as
     --запуск после каждого теста
 
     --пометка что это тест и его нужно запускать
-    --%test(проверка получения по id)
+    --%test(проверка на удаление)
     procedure not_deleted_spec_check;
 
     --пометка что успех теста будет сброшенное исключение
@@ -35,11 +35,11 @@ as
     procedure failed_not_deleted_spec_check;
 
     --пометка что это тест и его нужно запускать
-    --%test(проверка получения по id)
+    --%test(получение строки по id)
     procedure get_specs_with_own_types;
 
     --%test(ошибка получения по id)
-    --%throws(no_data_found)
+    --%throws(-20809)
     procedure failed_get_specs_with_own_types;
 
 end;
@@ -147,6 +147,7 @@ end;
         returning spec_id into mock_id_spec;
     end;
 
+
     procedure rollback_after_all
     as
     begin
@@ -165,4 +166,8 @@ end;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
     end;
+end;
+
+begin
+    TOOL_UT3.UT.RUN('LAZORENKO_AL.TEST_PKG_SPECS');
 end;

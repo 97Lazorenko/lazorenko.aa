@@ -1,22 +1,6 @@
-/**
-  USING
 
-  тесты нужно писать через пакеты
-  с определенным синтаксисом
-  специфичным только для фраемворка utPLSQL
- */
-
-
-
---нейминг test_имя-тестируемого-обьекта
 create or replace package lazorenko_al.test_pkg_patient
 as
-    /*
-     нельзя писать комментарии:
-     - на той же строке с аннотацией
-     - между аннотацией и связанной с ней процедурой
-     */
-
 
     --%suite
     --пакет относится к тестам
@@ -40,44 +24,34 @@ as
     procedure print_after_each;
     --запуск после каждого теста
 
-    /*
-     в любом из before/after тригеров
-     можно указать имя другого исполняемого
-     обьекта в БД
-     */
-
-    --
-
     --пометка что это тест и его нужно запускать
-    --%test(проверка получения по id)
+    --%test(получение строки по id)
     procedure get_by_id;
 
-    --пометка что успех теста будет сброшенное исключение
-    --допускаются именованные ошибки, системные ошибки, ORA-номер ошибок
     --%test(ошибка получения по id)
     --%throws(no_data_found)
     procedure failed_get_by_id;
 
     --пометка что это тест и его нужно запускать
-    --%test(проверка получения по id)
+    --%test(проверка возраста)
     procedure check_age;
 
     --%test(ошибка получения по id)
     --%throws(-20400)
     procedure failed_check_age;
 
-    --%test(проверка получения по id)
+    --%test(проверка пола)
     procedure sex_check;
 
     --%test(ошибка получения по id)
     --%throws(-20401)
     procedure failed_sex_check;
 
-    --%test(проверка получения по id)
+    --%test(проверка наличия ОМС)
     procedure doc_check;
 
     --%test(ошибка получения по id)
-    --%throws(-20401)
+    --%throws(-20402)
     procedure failed_doc_check;
 
 end;
@@ -100,7 +74,7 @@ as
 
     procedure get_by_id
     as
-        v_patient lazorenko_al.t_patient1;
+        v_patient lazorenko_al.t_patient2;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
@@ -108,12 +82,11 @@ as
 
         TOOL_UT3.UT.EXPECT(v_patient.patient_id).TO_EQUAL(mock_id_patient);
 
-        --больше методов в TOOL_UT3.UT_EXPECTATION
     end;
 
     procedure failed_get_by_id
     as
-        v_patient lazorenko_al.t_patient1;
+        v_patient lazorenko_al.t_patient2;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
@@ -237,3 +210,7 @@ as
     end;
 end;
 /
+
+begin
+    TOOL_UT3.UT.RUN('LAZORENKO_AL.TEST_PKG_PATIENT');
+end;

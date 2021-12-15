@@ -36,23 +36,21 @@ as
     --%test(проверка получения по id)
     procedure get_ticket_by_id;
 
-    --%test(проверка получения по id)
+    --%test(повторная запись)
     procedure ticket_check;
 
-    --%test(проверка получения по id)
+    --%test(проверка статуса талона)
     procedure ticket_status_check;
 
-    --%test(проверка получения по id)
+    --%test(проверка времени талона)
     procedure time_check;
 
-    --%test(проверка получения по id)
+    --%test(проверка времени талона при отмене)
     procedure ticket_time_check;
 
-    --%test(проверка получения по id)
+    --%test(получение строки по id)
     procedure get_ticket_rowtype_by_id;
 
-    --пометка что успех теста будет сброшенное исключение
-    --допускаются именованные ошибки, системные ошибки, ORA-номер ошибок
     --%test(ошибка получения по id)
     --%throws(no_data_found)
     procedure failed_get_ticket_by_id;
@@ -62,30 +60,30 @@ as
     procedure failed_check_ticket;
 
      --%test(ошибка получения по id)
-    --%throws(-20403)
+    --%throws(-20404)
     procedure failed_check_ticket_status;
 
     --%test(ошибка получения по id)
-    --%throws(-20404)
+    --%throws(-20405)
     procedure failed_time_check;
 
     --%test(ошибка получения по id)
-    --%throws(-20405)
+    --%throws(-20301)
      procedure failed_ticket_time_check;
 
     --%test(ошибка получения по id)
-    --%throws(-20301)
+    --%throws(-20659)
     procedure failed_get_ticket_rowtype_by_id;
 
-    --%test(тест на foreign_key id_gender)
+    --%test(тест на foreign_key id_doctor)
     --%throws(-01400)
     procedure check_ticket_id_doctor_constraint;
 
-    --%test(тест на foreign_key id_account)
+    --%test(тест на foreign_key id_status)
     --%throws(-01400)
     procedure check_ticket_id_stat_constraint;
 
-    --%test(тест на surname is not null)
+    --%test(тест на appointment_beg is not null)
     --%throws(-01400)
     procedure check_ticket_appointment_constraint;
 
@@ -148,7 +146,6 @@ end;
 
         TOOL_UT3.UT.EXPECT(v_ticket.ticket_id).TO_EQUAL(mock_id_ticket);
 
-        --больше методов в TOOL_UT3.UT_EXPECTATION
     end;
 
     procedure ticket_check
@@ -161,7 +158,6 @@ end;
 
         TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
 
-        --больше методов в TOOL_UT3.UT_EXPECTATION
     end;
 
     procedure ticket_status_check
@@ -174,7 +170,6 @@ end;
 
         TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
 
-        --больше методов в TOOL_UT3.UT_EXPECTATION
     end;
 
     procedure time_check
@@ -186,8 +181,6 @@ end;
         v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.time_check(mock_id_ticket));
 
         TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
-
-        --больше методов в TOOL_UT3.UT_EXPECTATION
     end;
 
     procedure ticket_time_check
@@ -200,7 +193,6 @@ end;
 
         TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
 
-        --больше методов в TOOL_UT3.UT_EXPECTATION
     end;
 
 procedure failed_check_ticket
@@ -355,3 +347,7 @@ procedure failed_check_ticket
     end;
 end;
 /
+
+begin
+    TOOL_UT3.UT.RUN('LAZORENKO_AL.TEST_PKG_TICKET');
+end;

@@ -161,6 +161,9 @@ as
     as
     v_result boolean := true;
 
+    e_total exception;
+    pragma exception_init (e_total, -20666);
+
     begin
     if lazorenko_al.accordance_ckeck_repository.check_accordance_of_write_parameters(
         p_hospital_id => p_hospital_id,
@@ -246,8 +249,24 @@ as
         ))
     then v_result:=false;
     end if;
-
+        if v_result=false then
+        raise_application_error (-20666, 'Ошибка верификации входных параметров');
+        end if;
     return v_result;
+  /*  exception
+
+        when e_total then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' ||'","hospital_id":"' || p_hospital_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('Ошибка верификации входных параметров');
+
+    return false; */
     end;
 
     function check_cancel(
@@ -258,11 +277,18 @@ as
     return boolean
     as
     v_result boolean := true;
+
+    e_total exception;
+    pragma exception_init (e_total, -20666);
+
     begin
     if (not lazorenko_al.accordance_ckeck_repository.check_accordance_for_cancel(
     p_patient_id => p_patient_id,
     p_ticket_id => p_ticket_id
     )) then v_result:=false;
+       /* if v_result=false then
+        raise_application_error (-20666, 'Ошибка верификации входных параметров');
+        end if; */
     return v_result;
     end if;
 
@@ -275,7 +301,24 @@ as
     p_hospital_id => p_hospital_id
     )) then v_result:=false;
     end if;
-
+      if v_result=false then
+        raise_application_error (-20666, 'Ошибка верификации входных параметров');
+        end if;
     return v_result;
+
+   /*     exception
+
+        when e_total then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' ||'","hospital_id":"' || p_hospital_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('Ошибка верификации входных параметров');
+
+    return false; */
     end;
 end;

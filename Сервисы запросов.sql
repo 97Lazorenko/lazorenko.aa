@@ -100,7 +100,7 @@ declare
     v_arr_hospital_info lazorenko_al.t_arr_hospital_info;
 begin
     v_arr_hospital_info:=lazorenko_al.service_for_query_3(
-    3
+    -1
 );
 end;
 

@@ -16,6 +16,9 @@ as
     as
     arr_city_with_regions lazorenko_al.t_arr_city_with_regions:=lazorenko_al.t_arr_city_with_regions();
 
+    e_no_city exception;
+    pragma exception_init (e_no_city, -20388);
+
     begin
 
         select lazorenko_al.t_city_with_regions(
@@ -31,7 +34,12 @@ as
         where p_region_id=c.region_id
           or p_region_id is null;
 
+        if arr_city_with_regions.first is null then
+        raise_application_error (-20388, 'Неверно указан регион');
+        end if;
+
     return arr_city_with_regions;
+
     end;
 
 end;
@@ -51,7 +59,7 @@ as
     p_hospital_id in number,
     p_zone_id in number
     )
-    return lazorenko_al.t_arr_doctors_detailed;
+    return lazorenko_al.t_arr_doctor_detailed;
 
 end;
 
@@ -79,7 +87,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
     exception
 
         when e_deleted_doctor then
@@ -93,7 +101,7 @@ as
 
             dbms_output.put_line('доктор удалён или отсутствует в базе');
 
-    return false;
+    return false; */
 
     end;
 
@@ -101,13 +109,16 @@ as
     p_hospital_id in number,
     p_zone_id in number
     )
-    return lazorenko_al.t_arr_doctors_detailed
+    return lazorenko_al.t_arr_doctor_detailed
     as
-    arr_doctors_detailed lazorenko_al.t_arr_doctors_detailed:=lazorenko_al.t_arr_doctors_detailed();
+    arr_doctors_detailed lazorenko_al.t_arr_doctor_detailed:=lazorenko_al.t_arr_doctor_detailed();
+
+    e_no_doctor exception;
+    pragma exception_init (e_no_doctor, -20660);
 
     begin
 
-        select lazorenko_al.t_doctors_detailed(
+        select lazorenko_al.t_doctor_detailed(
             dname => d.name,
             sname => s.name,
             qualification => di.qualification)
@@ -123,6 +134,10 @@ as
              case
              when d.zone_id=p_zone_id then 1
              else 0 end desc;
+
+        if arr_doctors_detailed.first is null then
+        raise_application_error (-20660, 'Неверно указана больница');
+        end if;
 
     return arr_doctors_detailed;
     end;
@@ -173,7 +188,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
     exception
 
         when e_deleted_hospital then
@@ -187,7 +202,7 @@ as
 
             dbms_output.put_line('больница удалена или отсутствует в базе');
 
-    return false;
+    return false; */
     end;
 
     function get_hospitals_with_own_types(
@@ -196,6 +211,10 @@ as
     return lazorenko_al.t_arr_hospital_info
     as
     arr_hospital_info lazorenko_al.t_arr_hospital_info:=lazorenko_al.t_arr_hospital_info();
+
+    no_hospital_found exception;
+    pragma exception_init (no_hospital_found, -20800);
+
     begin
         select lazorenko_al.t_hospital_info(
             hname => h.name,
@@ -230,7 +249,25 @@ as
              else 0
              end desc;
 
-    return arr_hospital_info;
+        if arr_hospital_info.first is null then
+        raise_application_error(-20800,'указана неверная специальность');
+        end if;
+
+            return arr_hospital_info;
+  /*  exception
+
+        when no_hospital_found then
+            lazorenko_al.add_error_log(
+    $$plsql_unit_owner||'.'||$$plsql_unit,
+        '{"error":"' || sqlerrm
+                  ||'","value":"' ||'","spec_id":"' || p_spec_id
+                  ||'","backtrace":"' || dbms_utility.format_error_backtrace()
+                  ||'"}'
+            );
+
+            dbms_output.put_line('По заданным параметрам ничего не найдено');
+
+    return arr_hospital_info; */
 
     end;
 
@@ -256,7 +293,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
     exception
 
         when e_bad_time then
@@ -271,7 +308,7 @@ as
             dbms_output.put_line('ошибка - запись можжно отменить не позднее, чем за 2 часа до закрытия больницы');
 
     return false;
-
+*/
     end;
 end;
 
@@ -315,7 +352,7 @@ as
             end if;
 
     return v_count>0;
-
+/*
     exception
 
         when e_deleted_spec then
@@ -329,7 +366,7 @@ as
 
             dbms_output.put_line('специальность удалена или отсутствует в базе');
 
-    return false;
+    return false; */
     end;
 
     function get_specs_with_own_types(
@@ -339,6 +376,9 @@ as
     return lazorenko_al.t_arr_specs
     as
         arr_specs lazorenko_al.t_arr_specs :=lazorenko_al.t_arr_specs();
+
+        no_spec_found exception;
+        pragma exception_init (no_spec_found, -20809);
 
     begin
 
@@ -352,6 +392,10 @@ as
         where s.delete_from_the_sys is null and d.dismiss_date is null and h.delete_from_the_sys is null
           and (p_hospital_id=hospital_id or p_hospital_id is null)
           and (p_doctor_id=doctor_id or p_doctor_id is null);
+
+        if arr_specs.first is null then
+        raise_application_error(-20809,'указаны неверный врач или больница');
+        end if;
 
     return arr_specs;
 
@@ -405,6 +449,8 @@ as
     return lazorenko_al.t_arr_ticket
     as
     arr_ticket lazorenko_al.t_arr_ticket:=lazorenko_al.t_arr_ticket();
+    e_no_ticket exception;
+    pragma exception_init (e_no_ticket, -20659);
 
     begin
 
@@ -418,6 +464,10 @@ as
         where (doctor_id=p_doctor_id or p_doctor_id is null) and t.appointment_beg>to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss')
         order by t.appointment_beg;
 
+        if arr_ticket.first is null then
+        raise_application_error (-20659, 'Неверно указан доктор');
+        end if;
+
     return arr_ticket;
 
     end;
@@ -428,6 +478,7 @@ as
     return lazorenko_al.t_tickets
     as
     v_ticket lazorenko_al.t_tickets;
+
     begin
         select lazorenko_al.t_tickets(
         ticket_id => t.ticket_id,
@@ -442,7 +493,7 @@ as
 
 
     return v_ticket;
-
+/*
         exception
         when no_data_found
         then lazorenko_al.add_error_log(
@@ -455,7 +506,7 @@ as
 
             dbms_output.put_line('такого талона не существует');
 
-    return null;
+    return null; */
 
     end;
 
@@ -488,7 +539,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
         exception
         when e_record_exists then
             lazorenko_al.add_error_log(
@@ -501,7 +552,7 @@ as
 
             dbms_output.put_line('Вы уже записаны на данный талон');
 
-    return false;
+    return false; */
 
     end;
 
@@ -533,7 +584,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
         exception
         when e_wrong_status then
             lazorenko_al.add_error_log(
@@ -546,7 +597,7 @@ as
 
             dbms_output.put_line('Талон закрыт');
 
-    return false;
+    return false; */
 
     end;
 
@@ -577,7 +628,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
         exception
         when e_wrong_time then
             lazorenko_al.add_error_log(
@@ -590,7 +641,7 @@ as
 
             dbms_output.put_line('Приём уже завершён');
 
-    return false;
+    return false; */
 
     end;
 
@@ -617,7 +668,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
     exception
 
         when e_old_ticket then
@@ -632,7 +683,7 @@ as
             dbms_output.put_line('невозможно оменить устаревший талон');
 
     return false;
-
+*/
     end;
 end;
 
@@ -672,7 +723,7 @@ as
     function get_patient_info_by_id(
     p_patient_id number
     )
-    return lazorenko_al.t_patient1;
+    return lazorenko_al.t_patient2;
 
     function check_age(
     p_patient_id in number,
@@ -698,13 +749,13 @@ as
     function get_patient_info_by_id(
     p_patient_id number
     )
-    return lazorenko_al.t_patient1
+    return lazorenko_al.t_patient2
     as
-    v_patient lazorenko_al.t_patient1;
+    v_patient lazorenko_al.t_patient2;
 
     begin
 
-        select lazorenko_al.t_patient1(
+        select lazorenko_al.t_patient2(
             patient_id => p.patient_id,
             last_name => p.last_name,
             first_name => p.first_name,
@@ -719,7 +770,7 @@ as
         where p.patient_id = p_patient_id;
 
     return v_patient;
-
+/*
         exception
         when no_data_found then
         lazorenko_al.add_error_log(
@@ -732,7 +783,7 @@ as
 
         dbms_output.put_line('данный пациент отсутствует в базе больницы');
 
-    return null;
+    return null; */
     end;
 
     function check_age(
@@ -741,7 +792,7 @@ as
     )
     return boolean
     as
-    v_patient lazorenko_al.t_patient1;
+    v_patient lazorenko_al.t_patient2;
     v_age number;
     v_count number;
 
@@ -765,7 +816,7 @@ as
     end if;
 
     return v_count>0;
-
+/*
     exception
 
         when e_wrong_age then
@@ -780,7 +831,7 @@ as
             dbms_output.put_line('возраст пациента не соответствует возрасту специальности');
 
     return false;
-
+*/
     end;
 
 
@@ -791,7 +842,7 @@ as
     return boolean
     as
     v_sex number;
-    v_patient lazorenko_al.t_patient1;
+    v_patient lazorenko_al.t_patient2;
     v_count number;
 
     e_wrong_sex exception;
@@ -813,7 +864,7 @@ as
     end if;
 
     return v_count>0;
-
+/*
     exception
         when e_wrong_sex then
             lazorenko_al.add_error_log(
@@ -827,7 +878,7 @@ as
             dbms_output.put_line('пол пациента не соответствует полу специальности');
 
     return false;
-
+*/
     end;
 
 
@@ -854,7 +905,7 @@ as
     end if;
 
     return v_count>0;
-
+/*
     exception
         when e_no_docs then
             lazorenko_al.add_error_log(
@@ -868,7 +919,7 @@ as
             dbms_output.put_line('отсутствуют данные по полису ОМС');
 
     return false;
-
+*/
     end;
 end;
 
@@ -993,7 +1044,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
     exception
 
         when e_no_accordance then
@@ -1007,7 +1058,7 @@ as
 
             dbms_output.put_line('несоответствие вводимых для записи параметров');
 
-    return false;
+    return false; */
     end;
 
     function check_accordance_for_cancel(
@@ -1033,7 +1084,7 @@ as
         end if;
 
     return v_count>0;
-
+/*
     exception
 
         when e_bad_accordance then
@@ -1048,7 +1099,7 @@ as
             dbms_output.put_line('у вас отсутствует действующий талон с подобными параметрами или талон закрыт');
 
     return false;
-
+*/
     end;
 end;
 

@@ -25,24 +25,24 @@ as
     --запуск после каждого теста
 
     --пометка что это тест и его нужно запускать
-    --%test(проверка получения по id)
+    --%test(проверка получения  строки по id)
     procedure get_hospitals_with_own_types;
 
     --пометка что успех теста будет сброшенное исключение
     --допускаются именованные ошибки, системные ошибки, ORA-номер ошибок
     --%test(ошибка получения по id)
-    --%throws(no_data_found)
+    --%throws(-20800)
     procedure failed_get_hospitals_with_own_types;
 
     --пометка что это тест и его нужно запускать
-    --%test(проверка получения по id)
+    --%test(проверка на удаление)
     procedure not_deleted_hospital_check;
 
     --%test(ошибка получения по id)
     --%throws(-20392)
     procedure failed_not_deleted_hospital_check;
 
-    --%test(проверка получения по id)
+    --%test(проверка пвремени работы)
     procedure hospital_time_check;
 
     --%test(ошибка получения по id)
@@ -86,7 +86,7 @@ as
 
         v_hospital := lazorenko_al.pkg_hospital_repository.get_hospitals_with_own_types(mock_id_spec);
 
-        TOOL_UT3.UT.EXPECT(v_item.hname).TO_EQUAL(mock_hname);
+        TOOL_UT3.UT.EXPECT(v_item.doctor_id).TO_EQUAL(mock_id_doctor);
 
     end;
     end loop;
@@ -108,7 +108,7 @@ end;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_hospital_repository.not_deleted_hospital_check(mock_id_hospital));
+        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_hospital_repository.not_deleted_hospital_check(4));
 
         TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
     end;
@@ -139,7 +139,7 @@ end;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_hospital_repository.hospital_time_check(mock_id_hospital));
+        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_hospital_repository.hospital_time_check(-1));
     end;
 
     procedure seed_before_all
@@ -155,7 +155,7 @@ end;
     mock_id_ownership_type :=1;
     mock_enter_into_the_sys :=sysdate - 1000;
     mock_delete_from_the_sys := null;
-    mock_id_spec :=8;
+    mock_id_spec :=3;
 
 
 
@@ -197,4 +197,10 @@ end;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
     end;
+end;
+
+
+
+begin
+    TOOL_UT3.UT.RUN('LAZORENKO_AL.TEST_PKG_HOSPITAL');
 end;
