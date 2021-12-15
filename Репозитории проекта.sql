@@ -248,7 +248,7 @@ as
     select count(*)
     into v_count
     from lazorenko_al.work_time w
-    where w.end_time>(TO_CHAR(sysdate+1/12, 'hh24:mi'))
+    where w.end_time>to_char(sysdate, 'hh24:mi')--(TO_CHAR(sysdate+1/12, 'hh24:mi'))
     and w.day in (to_char(sysdate, 'd')) and w.hospital_id=p_hospital_id;
 
         if v_count=0 then

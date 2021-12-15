@@ -34,7 +34,7 @@ begin
     if v_response.patient_id is not null then
     declare
 
-        v_object json_object_t;--:= json_object_t();
+        v_object json_object_t:= json_object_t();
     begin
         v_object.put('record_id', v_response.record_id);
         v_object.put('record_stat_id', v_response.record_stat_id);
@@ -46,7 +46,7 @@ begin
     end if;
 
     v_json.put('response', v_json_response);
-    v_return_clob := v_json.to_Clob;--();
+    v_return_clob := v_json.to_Clob();
 
     return v_return_clob;
 
@@ -61,7 +61,7 @@ v_clob clob;
 
 begin
 
-    v_clob := lazorenko_al.json_record(33, 3, true, 5, 3, 4);
+    v_clob := lazorenko_al.json_record(33, 3, true, 3, 3, 4);
 
     dbms_output.put_line(v_clob);
 
@@ -97,7 +97,7 @@ begin
 
     if v_response.patient_id is not null then
     declare
-        v_object json_object_t;-- := json_object_t();
+        v_object json_object_t:= json_object_t();
     begin
         v_object.put('record_id', v_response.record_id);
         v_object.put('record_stat_id', v_response.record_stat_id);
@@ -110,7 +110,7 @@ begin
 
     v_json.put('response', v_json_response);
 
-    v_return_clob := v_json.to_Clob;--();
+    v_return_clob := v_json.to_Clob();
 
     return v_return_clob;
 
