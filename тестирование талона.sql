@@ -3,36 +3,18 @@ create or replace package lazorenko_al.test_pkg_ticket
 as
 
     --%suite
-    --пакет относится к тестам
 
     --%rollback(manual)
-    --управление транзакциями вручную
 
     --%beforeall
     procedure seed_before_all;
-    --запуск перед всеми тестами один раз
 
     --%afterall
     procedure rollback_after_all;
-    --запуск после всех тестов один раз
 
     --%beforeeach
     procedure print_before_each;
-    --запуск перед каждым тестом
 
-    --%aftereach
-    procedure print_after_each;
-    --запуск после каждого теста
-
-    /*
-     в любом из before/after тригеров
-     можно указать имя другого исполняемого
-     обьекта в БД
-     */
-
-    --
-
-    --пометка что это тест и его нужно запускать
     --%test(проверка получения по id)
     procedure get_ticket_by_id;
 
@@ -50,30 +32,6 @@ as
 
     --%test(получение строки по id)
     procedure get_ticket_rowtype_by_id;
-
-    --%test(ошибка получения по id)
-    --%throws(no_data_found)
-    procedure failed_get_ticket_by_id;
-
-     --%test(ошибка получения по id)
-    --%throws(-20403)
-    procedure failed_check_ticket;
-
-     --%test(ошибка получения по id)
-    --%throws(-20404)
-    procedure failed_check_ticket_status;
-
-    --%test(ошибка получения по id)
-    --%throws(-20405)
-    procedure failed_time_check;
-
-    --%test(ошибка получения по id)
-    --%throws(-20301)
-     procedure failed_ticket_time_check;
-
-    --%test(ошибка получения по id)
-    --%throws(-20659)
-    procedure failed_get_ticket_rowtype_by_id;
 
     --%test(тест на foreign_key id_doctor)
     --%throws(-01400)
@@ -125,15 +83,6 @@ as
     end;
     end loop;
     end if;
-end;
-
-    procedure failed_get_ticket_rowtype_by_id
-    as
-        v_ticket lazorenko_al.t_arr_ticket;
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-
-        v_ticket := lazorenko_al.pkg_ticket_repository.get_ticket_with_own_types(-1);
     end;
 
     procedure get_ticket_by_id
@@ -150,94 +99,49 @@ end;
 
     procedure ticket_check
     as
-        v_result number;
+        v_result boolean;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.ticket_check(mock_id_ticket, mock_id_patient));
+        v_result := lazorenko_al.pkg_ticket_repository.ticket_check(mock_id_ticket, mock_id_patient);
 
-        TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
+        TOOL_UT3.UT.EXPECT(v_result).TO_BE_TRUE();
 
     end;
 
     procedure ticket_status_check
     as
-        v_result number;
+        v_result boolean;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.ticket_status_check(mock_id_ticket, mock_id_patient));
+        v_result := lazorenko_al.pkg_ticket_repository.ticket_status_check(mock_id_ticket, mock_id_patient);
 
-        TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
+        TOOL_UT3.UT.EXPECT(v_result).TO_BE_TRUE();
 
     end;
 
     procedure time_check
     as
-        v_result number;
+        v_result boolean;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.time_check(mock_id_ticket));
+        v_result := lazorenko_al.pkg_ticket_repository.time_check(mock_id_ticket);
 
-        TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
+        TOOL_UT3.UT.EXPECT(v_result).TO_BE_TRUE();
     end;
 
     procedure ticket_time_check
     as
-        v_result number;
+        v_result boolean;
     begin
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
 
-        v_result := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.ticket_time_check(mock_id_ticket));
+        v_result := lazorenko_al.pkg_ticket_repository.ticket_time_check(mock_id_ticket);
 
-        TOOL_UT3.UT.EXPECT(v_result).TO_EQUAL(1);
+        TOOL_UT3.UT.EXPECT(v_result).TO_BE_TRUE();
 
-    end;
-
-procedure failed_check_ticket
-    as
-        v_ticket number;
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-
-        v_ticket := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.ticket_check(-1, 1));
-    end;
-
-    procedure failed_check_ticket_status
-    as
-        v_ticket number;
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-
-        v_ticket := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.ticket_status_check(-1, 1));
-    end;
-
-    procedure failed_time_check
-    as
-        v_ticket number;
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-
-        v_ticket := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.time_check(-1));
-    end;
-
-    procedure failed_ticket_time_check
-    as
-        v_ticket number;
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-
-        v_ticket := sys.diutil.bool_to_int(lazorenko_al.pkg_ticket_repository.ticket_time_check(27));
-    end;
-
-    procedure failed_get_ticket_by_id
-    as
-        v_ticket lazorenko_al.t_tickets;
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-
-        v_ticket := lazorenko_al.pkg_ticket_repository.get_ticket_info_by_id(-1);
     end;
 
     procedure check_ticket_id_doctor_constraint
@@ -340,11 +244,6 @@ procedure failed_check_ticket
         if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
     end;
 
-    procedure print_after_each
-    as
-    begin
-        if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
-    end;
 end;
 /
 

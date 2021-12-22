@@ -48,14 +48,13 @@ begin
     if v_arr_city_with_regions.count>0 then
     for i in v_arr_city_with_regions.first..v_arr_city_with_regions.last
     loop
-    declare
+        declare
         v_item lazorenko_al.t_city_with_regions :=v_arr_city_with_regions(i);
     begin
         dbms_output.put_line(v_item.names || ' - ' || v_item.name);
     end;
     end loop;
     end if;
-
 end;
 
 --ЗАПРОС 2
@@ -99,7 +98,7 @@ declare
 
 begin
 
-    v_arr_specs := lazorenko_al.get_specs_with_own_types(null, null);
+    v_arr_specs := lazorenko_al.get_specs_with_own_types(null, 5);
 
     if v_arr_specs.count>0 then
     for i in v_arr_specs.first..v_arr_specs.last
@@ -130,7 +129,7 @@ create or replace type lazorenko_al.t_arr_hospital_info as table of lazorenko_al
 
 --запрос
 
-create or replace function lazorenko_al.get_doctors_specs_with_own_types(
+create or replace function lazorenko_al.get_hospitals_with_own_types(
     p_spec_id number
 )
 return lazorenko_al.t_arr_hospital_info
@@ -180,7 +179,7 @@ declare
 
 begin
 
-    v_arr_hospital_info := lazorenko_al.get_doctors_specs_with_own_types(2);
+    v_arr_hospital_info := lazorenko_al.get_hospitals_with_own_types(2);
 
     if v_arr_hospital_info.count>0 then
     for i in v_arr_hospital_info.first..v_arr_hospital_info.last
@@ -349,7 +348,7 @@ begin
     select lazorenko_al.t_records(
         last_name => last_name,
         first_name => first_name,
-        petronymic => petronymic,
+        petronymic => p.petronymic,
         name => d.name,
         rname => record_status.name,
         appointment_beg => appointment_beg,

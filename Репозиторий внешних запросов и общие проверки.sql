@@ -7,7 +7,7 @@ as
     return clob;
 end;
 
---его тело
+
 create or replace package body lazorenko_al.pkg_doctor_remote_repository
 as
     function  get_doctors_remote(
@@ -253,11 +253,11 @@ as
         raise_application_error (-20666, 'Ошибка верификации входных параметров');
         end if;
     return v_result;
-  /*  exception
+    exception
 
         when e_total then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","hospital_id":"' || p_hospital_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -266,7 +266,7 @@ as
 
             dbms_output.put_line('Ошибка верификации входных параметров');
 
-    return false; */
+    return false;
     end;
 
     function check_cancel(
@@ -286,9 +286,9 @@ as
     p_patient_id => p_patient_id,
     p_ticket_id => p_ticket_id
     )) then v_result:=false;
-       /* if v_result=false then
+        if v_result=false then
         raise_application_error (-20666, 'Ошибка верификации входных параметров');
-        end if; */
+        end if;
     return v_result;
     end if;
 
@@ -306,11 +306,11 @@ as
         end if;
     return v_result;
 
-   /*     exception
+        exception
 
         when e_total then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","hospital_id":"' || p_hospital_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -319,6 +319,6 @@ as
 
             dbms_output.put_line('Ошибка верификации входных параметров');
 
-    return false; */
+    return false;
     end;
 end;

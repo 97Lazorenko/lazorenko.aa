@@ -1,12 +1,7 @@
--- noinspection SqlOverloadForFile
-/*
- PACKING
- */
+
 --контроллер
 
-create or replace function lazorenko_al.controller/*(
-    --p_parameters...
-)*/
+create or replace function lazorenko_al.controller_for_doctors
 return clob
 as
 
@@ -18,13 +13,13 @@ as
 
 begin
 
-    v_response := lazorenko_al.service(
+    v_response := lazorenko_al.service_for_doctors(
         out_result => v_result
     );
 
     --в идеале это нужно обернуть в так называемые resource
     --чтобы переиспользовать сериализацию
-    v_json.put('code', v_result); --пакуем код логического результата
+    v_json.put('code', v_result);
 
     if v_response.count>0 then
     for i in v_response.first..v_response.last
@@ -44,43 +39,26 @@ begin
     end loop;
     end if;
 
-    v_json.put('response', v_json_response); --пакуем полезные данные
+    v_json.put('response', v_json_response);
 
     v_return_clob := v_json.to_Clob();
 
     return v_return_clob;
 
 end;
-/
 
 
 
---некий rest handler
+
+--применение
 declare
 
     v_clob clob;
 
 begin
 
-    v_clob := lazorenko_al.controller();
+    v_clob := lazorenko_al.controller_for_record();
 
-    --dbms_output.put_line не умеет выводить clob
-    --происходит автокаст,
-    --но он работает пока clob по размеру <= varchar2
     dbms_output.put_line(v_clob);
 
 end;
-/
-
-
-
-/**
-  в чем разница?:
-  * APEX_JSON - потоковый вывод
-  * JSON_ELEMENT_T - пакуется в пямяти
-  никаких явных минусов ни у того, ни у другого нет.
-  просто раз при установке инструментария ORDS
-  они предлагают в комплекте APEX_JSON,
-  то его и было решено использовать в рабочем продукте.
-  вам можно использовать стандартные инструменты JSON_ELEMENT_T
- */

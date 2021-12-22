@@ -11,39 +11,59 @@ create or replace type lazorenko_al.t_specialisation as object(  --вместо 
 create or replace type lazorenko_al.t_arr_specialisation as table of lazorenko_al.t_specialisation; --массив
 
 --пациент
-create or replace type lazorenko_al.t_patient as object(  --вместо row%type
+create or replace type lazorenko_al.t_patient2 as object(  --вместо row%type
     patient_id number,
+    last_name varchar2(100),
+    first_name varchar2(100),
+    petronymic varchar2(100),
     born_date date,
-    sex_id number
+    tel_number varchar2(100),
+    sex_id number,
+    zone_id number
 );
 
 
-alter type lazorenko_al.t_patient  --добавление собственного конструктора
-add constructor function t_patient(
+alter type lazorenko_al.t_patient2  --добавление собственного конструктора
+add constructor function t_patient2(
     patient_id number,
+    last_name varchar2,
+    first_name varchar2,
+    petronymic varchar2,
     born_date date,
-    sex_id number
+    tel_number varchar2,
+    sex_id number,
+    zone_id number
 ) return self as result
 cascade;
 
-create or replace type body lazorenko_al.t_patient  --его тело
+create or replace type body lazorenko_al.t_patient2  --его тело
 as
-    constructor function t_patient(
+    constructor function t_patient2(
         patient_id number,
+        last_name varchar2,
+        first_name varchar2,
+        petronymic varchar2,
         born_date date,
-        sex_id number
-    )
+        tel_number varchar2,
+        sex_id number,
+        zone_id number
+        )
     return self as result
     as
     begin
         self.patient_id := patient_id;
+        self.last_name := last_name;
+        self.first_name := first_name;
+        self.petronymic := petronymic;
         self.born_date := born_date;
+        self.tel_number := tel_number;
         self.sex_id := sex_id;
+        self.zone_id := zone_id;
         return;
     end;
 end;
 
-create or replace type lazorenko_al.t_arr_patient as table of lazorenko_al.t_patient;  --массив
+create or replace type lazorenko_al.t_arr_patient2 as table of lazorenko_al.t_patient2;  --массив
 
 --документы пациента
 create or replace type lazorenko_al.t_documents_numbers as object(  --вместо row%type
@@ -134,6 +154,35 @@ create or replace type lazorenko_al.t_record as object(  --вместо row%type
     patient_id number,
     ticket_id number);
 
+alter type lazorenko_al.t_record  --добавление собственного конструктора
+add constructor function t_record(
+    record_id number,
+    record_stat_id number,
+    patient_id number,
+    ticket_id number
+) return self as result
+cascade;
+
+create or replace type body lazorenko_al.t_record  --его тело
+as
+    constructor function t_record(
+    record_id number,
+    record_stat_id number,
+    patient_id number,
+    ticket_id number
+    )
+    return self as result
+    as
+    begin
+        self.record_id := record_id;
+        self.record_stat_id:= record_stat_id;
+        self.patient_id := patient_id;
+        self.ticket_id := ticket_id;
+        return;
+    end;
+end;
+
+
 create or replace type lazorenko_al.t_arr_record as table of lazorenko_al.t_record;  --массив
 
 alter type lazorenko_al.t_tickets  --добавление собственного конструктора
@@ -166,3 +215,25 @@ as
         return;
     end;
 end;
+
+
+
+
+
+create or replace type lazorenko_al.t_hospitals as object(
+    id_hospital number,
+    name varchar2(100),
+    address varchar2(100),
+    id_town number);
+
+create or replace type lazorenko_al.t_arr_hospitals as table of lazorenko_al.t_hospitals;
+
+
+
+
+create or replace type lazorenko_al.t_new_specs as object(
+    id_specialty number,
+    name varchar2(100),
+    id_hospital number);
+
+create or replace type lazorenko_al.t_arr_new_specs as table of lazorenko_al.t_new_specs;

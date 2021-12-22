@@ -87,8 +87,10 @@ begin
     declare
         v_item lazorenko_al.t_hospital_info := arr_hospital_info(i);
     begin
-        dbms_output.put_line('название больницы - ' || v_item.hname || '; сейчас '|| v_item.aname ||'; число докторов указанной специальности=' || v_item.doctor_id
-                                 ||chr(10)||'; форма собственности - '|| v_item.ownership_type || '; закрывается в ' || v_item.end_time);
+        dbms_output.put_line(chr(10)||'название больницы - ' || v_item.hname || '; сейчас '|| v_item.aname
+                                 ||' число докторов указанной специальности=' || v_item.doctor_id
+                                 ||chr(10)||' форма собственности - '|| v_item.ownership_type || '; закрывается в '
+                                 || v_item.end_time||chr(10));
     end;
     end loop;
     end if;
@@ -100,7 +102,7 @@ declare
     v_arr_hospital_info lazorenko_al.t_arr_hospital_info;
 begin
     v_arr_hospital_info:=lazorenko_al.service_for_query_3(
-    -1
+    3
 );
 end;
 
@@ -110,9 +112,9 @@ create or replace function lazorenko_al.service_for_query_4(
     p_hospital_id number,
     p_zone_id number
 )
-return lazorenko_al.t_arr_doctors_detailed
+return lazorenko_al.t_arr_doctor_detailed
 as
-    arr_doctors_detailed lazorenko_al.t_arr_doctors_detailed:=lazorenko_al.t_arr_doctors_detailed();
+    arr_doctors_detailed lazorenko_al.t_arr_doctor_detailed:=lazorenko_al.t_arr_doctor_detailed();
 
 begin
     arr_doctors_detailed :=lazorenko_al.pkg_doctor_repository.get_doctor_with_own_types(
@@ -123,7 +125,7 @@ begin
     for i in arr_doctors_detailed.first..arr_doctors_detailed.last
     loop
     declare
-        v_item lazorenko_al.t_doctors_detailed := arr_doctors_detailed(i);
+        v_item lazorenko_al.t_doctor_detailed := arr_doctors_detailed(i);
     begin
         dbms_output.put_line('ФИО врача - ' || v_item.dname ||'; специальность - '|| v_item.sname || '; квалификация - ' || v_item.qualification);
     end;
@@ -134,7 +136,7 @@ end;
 
 --его применение
 declare
-    v_arr_doctors_detailed lazorenko_al.t_arr_doctors_detailed;
+    v_arr_doctors_detailed lazorenko_al.t_arr_doctor_detailed;
 begin
     v_arr_doctors_detailed:=lazorenko_al.service_for_query_4(
     7, 1

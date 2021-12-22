@@ -15,6 +15,7 @@ create or replace type lazorenko_al.t_arr_doctor as table of lazorenko_al.t_doct
 
 
 --сервис доктора
+
 create or replace function lazorenko_al.service_for_doctors(
     out_result out number
 )
@@ -30,7 +31,6 @@ begin
     v_clob := lazorenko_al.pkg_doctor_remote_repository.get_doctors_remote(
         out_result => v_result
     );
-
 
     select lazorenko_al.t_doctor(
         doctor_id => r.id_doctor,
@@ -54,7 +54,7 @@ begin
     return v_response;
 
 end;
-/
+
 
 
 --его применение
@@ -70,11 +70,11 @@ begin
         out_result => v_result
     );
 
-    if v_response.count>0 then
-    for i in v_response.first..v_response.last
-    loop
-        declare
-            v_item lazorenko_al.t_doctor := v_response(i);
+ if v_response.count>0 then
+                  for i in v_response.first..v_response.last
+                  loop
+                      declare
+                          v_item lazorenko_al.t_doctor := v_response(i);
         begin
             dbms_output.put_line('id врача: '||v_item.doctor_id ||'  '||'id больницы: '||v_item.hospital_id||'  '||'ФИО: '|| v_item.name|| ' '||v_item.fname||' '||v_item.petronymic);
         end;

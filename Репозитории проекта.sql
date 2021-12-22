@@ -87,12 +87,12 @@ as
         end if;
 
     return v_count>0;
-/*
+
     exception
 
         when e_deleted_doctor then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","doctor_id":"' || p_doctor_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -101,7 +101,7 @@ as
 
             dbms_output.put_line('доктор удалён или отсутствует в базе');
 
-    return false; */
+    return false;
 
     end;
 
@@ -188,12 +188,12 @@ as
         end if;
 
     return v_count>0;
-/*
+
     exception
 
         when e_deleted_hospital then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","hospital_id":"' || p_hospital_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -202,7 +202,7 @@ as
 
             dbms_output.put_line('больница удалена или отсутствует в базе');
 
-    return false; */
+    return false;
     end;
 
     function get_hospitals_with_own_types(
@@ -254,11 +254,11 @@ as
         end if;
 
             return arr_hospital_info;
-  /*  exception
+   exception
 
         when no_hospital_found then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","spec_id":"' || p_spec_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -267,7 +267,7 @@ as
 
             dbms_output.put_line('По заданным параметрам ничего не найдено');
 
-    return arr_hospital_info; */
+    return arr_hospital_info;
 
     end;
 
@@ -293,12 +293,12 @@ as
         end if;
 
     return v_count>0;
-/*
+
     exception
 
         when e_bad_time then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","hospital_id":"' || p_hospital_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -308,7 +308,7 @@ as
             dbms_output.put_line('ошибка - запись можжно отменить не позднее, чем за 2 часа до закрытия больницы');
 
     return false;
-*/
+
     end;
 end;
 
@@ -352,12 +352,12 @@ as
             end if;
 
     return v_count>0;
-/*
+
     exception
 
         when e_deleted_spec then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","spec_id":"' || p_spec_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -366,7 +366,7 @@ as
 
             dbms_output.put_line('специальность удалена или отсутствует в базе');
 
-    return false; */
+    return false;
     end;
 
     function get_specs_with_own_types(
@@ -493,11 +493,11 @@ as
 
 
     return v_ticket;
-/*
+
         exception
         when no_data_found
         then lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","ticket_id":"' || p_ticket_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -506,7 +506,7 @@ as
 
             dbms_output.put_line('такого талона не существует');
 
-    return null; */
+    return null;
 
     end;
 
@@ -539,11 +539,11 @@ as
         end if;
 
     return v_count>0;
-/*
+
         exception
         when e_record_exists then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","ticket_id":"' || p_ticket_id||'","patient_id":"' || p_patient_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -552,7 +552,7 @@ as
 
             dbms_output.put_line('Вы уже записаны на данный талон');
 
-    return false; */
+    return false;
 
     end;
 
@@ -584,11 +584,11 @@ as
         end if;
 
     return v_count>0;
-/*
+
         exception
         when e_wrong_status then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","ticket_id":"' || p_ticket_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -597,7 +597,7 @@ as
 
             dbms_output.put_line('Талон закрыт');
 
-    return false; */
+    return false;
 
     end;
 
@@ -628,11 +628,11 @@ as
         end if;
 
     return v_count>0;
-/*
+
         exception
         when e_wrong_time then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","ticket_id":"' || p_ticket_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -641,7 +641,7 @@ as
 
             dbms_output.put_line('Приём уже завершён');
 
-    return false; */
+    return false;
 
     end;
 
@@ -668,12 +668,12 @@ as
         end if;
 
     return v_count>0;
-/*
+
     exception
 
         when e_old_ticket then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","ticket_id":"' || p_ticket_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -683,7 +683,7 @@ as
             dbms_output.put_line('невозможно оменить устаревший талон');
 
     return false;
-*/
+
     end;
 end;
 
@@ -770,11 +770,11 @@ as
         where p.patient_id = p_patient_id;
 
     return v_patient;
-/*
+
         exception
         when no_data_found then
         lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","patient_id":"' || p_patient_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -783,7 +783,7 @@ as
 
         dbms_output.put_line('данный пациент отсутствует в базе больницы');
 
-    return null; */
+    return null;
     end;
 
     function check_age(
@@ -816,12 +816,12 @@ as
     end if;
 
     return v_count>0;
-/*
+
     exception
 
         when e_wrong_age then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","patient_id":"' || p_patient_id ||'","spec_id":"' || p_spec_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -831,7 +831,7 @@ as
             dbms_output.put_line('возраст пациента не соответствует возрасту специальности');
 
     return false;
-*/
+
     end;
 
 
@@ -864,11 +864,11 @@ as
     end if;
 
     return v_count>0;
-/*
+
     exception
         when e_wrong_sex then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","patient_id":"' || p_patient_id ||'","spec_id":"' || p_spec_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -878,7 +878,7 @@ as
             dbms_output.put_line('пол пациента не соответствует полу специальности');
 
     return false;
-*/
+
     end;
 
 
@@ -905,11 +905,11 @@ as
     end if;
 
     return v_count>0;
-/*
+
     exception
         when e_no_docs then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","patient_id":"' || p_patient_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -919,7 +919,7 @@ as
             dbms_output.put_line('отсутствуют данные по полису ОМС');
 
     return false;
-*/
+
     end;
 end;
 
@@ -1044,12 +1044,12 @@ as
         end if;
 
     return v_count>0;
-/*
+
     exception
 
         when e_no_accordance then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","hospital_id":"' || p_hospital_id ||'","doctor_id":"' || p_doctor_id ||'","spec_id":"' || p_spec_id ||'","ticket_id":"' || p_ticket_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -1058,7 +1058,7 @@ as
 
             dbms_output.put_line('несоответствие вводимых для записи параметров');
 
-    return false; */
+    return false;
     end;
 
     function check_accordance_for_cancel(
@@ -1084,12 +1084,12 @@ as
         end if;
 
     return v_count>0;
-/*
+
     exception
 
         when e_bad_accordance then
             lazorenko_al.add_error_log(
-    $$plsql_unit_owner||'.'||$$plsql_unit,
+    $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
         '{"error":"' || sqlerrm
                   ||'","value":"' ||'","patient_id":"' || p_patient_id ||'","ticket_id":"' || p_ticket_id
                   ||'","backtrace":"' || dbms_utility.format_error_backtrace()
@@ -1099,7 +1099,7 @@ as
             dbms_output.put_line('у вас отсутствует действующий талон с подобными параметрами или талон закрыт');
 
     return false;
-*/
+
     end;
 end;
 

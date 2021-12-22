@@ -142,9 +142,7 @@ as
                                                           --КОНСТАНТЫ БУДУТ ИСПОЛЬЗОВАНЫ В ФУНКЦИЯХ ЗАПИСИ И ОТМЕНЫ
     c_record_or_ticket_stat_second constant number := 2;
 
-    v_record_id lazorenko_al.records.record_id%type;
-
-    v_record_id number;
+    v_result number;
 
     function cancel_record(
     p_ticket_id in number)
@@ -165,23 +163,23 @@ as
          p_need_handle boolean
     )
     return number as
-        v_record_id number;
+        v_result number;
 
-        no_patient_found_or_wrong_ticket exception;
-        pragma exception_init (no_patient_found_or_wrong_ticket, -02291);
+        attempt_to_insert_null_into_not_null exception;
+        pragma exception_init (attempt_to_insert_null_into_not_null, -01400);
 
     begin
         if (p_need_handle) then
             begin
                 insert into lazorenko_al.records(record_id, record_stat_id, patient_id, ticket_id)
-                values (default, lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_first, p_patient_id, p_ticket_id)
-                returning ticket_id into v_record_id;
+                values (default, lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_first, p_patient_id, p_ticket_id);
+                --returning ticket_id into v_record_id;
 
                 update lazorenko_al.ticket t set t.ticket_stat_id=lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_second
                 where t.ticket_id=p_ticket_id;
 
             exception
-                when no_patient_found_or_wrong_ticket then
+                when attempt_to_insert_null_into_not_null then
 
                     lazorenko_al.add_error_log(
         $$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2),
@@ -191,27 +189,29 @@ as
                      ||'"}'
                     );
 
-                    dbms_output.put_line('запись внести невозможно - укажите другого пациента или талон');
+                    dbms_output.put_line('запись внести невозможно - все поля должны быть заполнены');
 
                 rollback;
-
-                return v_record_id;
+                v_result:=0;
+                return v_result;
 
             end;
         else
 
             insert into lazorenko_al.records(record_id, record_stat_id, patient_id, ticket_id)
 
-            values (default, lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_first, p_patient_id, p_ticket_id)
+            values (default, lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_first, p_patient_id, p_ticket_id);
 
-            returning ticket_id into v_record_id;
+            --returning ticket_id into v_record_id;
 
             update lazorenko_al.ticket t set t.ticket_stat_id=lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_second
             where t.ticket_id=p_ticket_id;
 
+            v_result:=1;
+
         end if;
 
-            return v_record_id;
+            return v_result;
 
     end;
 
@@ -219,7 +219,7 @@ as
         p_ticket_id in number
     )
     return  number  as
-        v_record_id number;
+        v_result number;
 
         no_ticket_found exception;
         pragma exception_init (no_ticket_found, -20500);
@@ -232,13 +232,15 @@ as
             update lazorenko_al.records r set r.record_stat_id=lazorenko_al.pkg_write_or_cancel.c_record_or_ticket_stat_second
             where r.ticket_id=p_ticket_id;
 
+            v_result:=1;
+
         if sql%notfound then
 
-            raise_application_error(-20500,'указан неверный талон');
+        raise_application_error(-20500,'указан неверный талон');
 
         end if;
 
-        return v_record_id;
+        return v_result;
 
     exception
         when no_ticket_found then
@@ -251,9 +253,11 @@ as
                       ||'"}'
             );
 
-            dbms_output.put_line('указан неверный номер талона');
+            dbms_output.put_line('указан неверный талон');
 
-        return v_record_id;
+        v_result:=0;
+
+        return v_result;
 
     end;
 
@@ -264,27 +268,29 @@ end;
 
 --ЗАПИСЬ
 declare
-    v_patient number := 10;
+    v_patient number := null;
     v_ticket number :=33;
-    v_record number;
+    v_result number;
 begin
-   v_record:=lazorenko_al.pkg_write_or_cancel.write_to_records(
+   v_result:=lazorenko_al.pkg_write_or_cancel.write_to_records(
         p_patient_id => v_patient,
         p_ticket_id => v_ticket,
         p_need_handle => true
     );
     commit;
+   dbms_output.put_line(v_result);
 end;
 
 --ОТМЕНА ЗАПИСИ
 declare
-    v_ticket number :=111;
-    v_record number;
+    v_ticket number :=null;
+    v_result number;
 begin
-   v_record:=lazorenko_al.pkg_write_or_cancel.cancel_record(
+   v_result:=lazorenko_al.pkg_write_or_cancel.cancel_record(
         p_ticket_id => v_ticket
     );
     commit;
+   dbms_output.put_line(v_result);
 end;
 
 ------------------------------------------------------------------------------------------------------------------------

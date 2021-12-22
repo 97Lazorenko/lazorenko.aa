@@ -3,13 +3,7 @@
  */
 
 
-
---самый минимум для вызова по сети
-select utl_http.request('https://app.swaggerhub.com/apis/AntonovAD/DoctorDB/1.0.0') from dual;
-
-
-
---типы под заголовки
+ --типы под заголовки
 create or replace type lazorenko_al.t_fetch_header as object (
     name varchar2(50),
     value varchar2(100)
@@ -18,8 +12,30 @@ create or replace type lazorenko_al.t_fetch_header as object (
 create or replace type lazorenko_al.t_arr_fetch_header as table of lazorenko_al.t_fetch_header;
 
 
+create or replace package lazorenko_al.pkg_client_http
+as
+function http_fetch
+(
+    p_url varchar2, --url запроса
+    p_method varchar2 default 'GET', --метод запроса
+    p_secure boolean default false, --использовать ли https
+    --p_https_host varchar2 default null,
+    p_headers lazorenko_al.t_arr_fetch_header default null, --заголовки запроса
+    p_body clob default null, --тело запроса
+    p_charset varchar2 default 'UTF-8', --кодировка тела запроса
+    p_timeout number default 60, --время таймаута соединения в секундах
+    p_encoding varchar2 default null, --режим сжатия
+    p_executor varchar2 default 'Anonymous Block', --информация о вызывающей программе (зачем?)
+    p_debug boolean default false, --режим отладки
+    out_success out boolean, --флаг успеха запроса
+    out_code out number --конкретный код ответа на запрос
+)
+return clob;
+end;
 
-create or replace function lazorenko_al.http_fetch
+create or replace package body lazorenko_al.pkg_client_http
+as
+function http_fetch
 (
     p_url varchar2, --url запроса
     p_method varchar2 default 'GET', --метод запроса
@@ -303,4 +319,5 @@ exception
         utl_http.end_response(http_resp);
         out_success := false;
         return null;
+end;
 end;

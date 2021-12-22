@@ -19,9 +19,9 @@ create table lazorenko_al.error_log(
     log_type varchar2(1000),
     params varchar2(4000))
     partition by range (sh_dt)
-    interval (NUMTOYMINTERVAL(3, 'MONTH')) --АВТОМАТИЧЕСКОЕ СОЗДАНИЕ НОВЫХ СЕКЦИЙ
+    interval (NUMTOYMINTERVAL(3, 'MONTH'))
 (
-    partition error_log_2021_qrt4 values less than (to_date('22.02.2022 00:00', 'dd.mm.yyyy hh24:mi'))
+    partition error_log_2021_2022_p1 values less than (to_date('22.02.2022 00:00', 'dd.mm.yyyy hh24:mi'))
 );
 
 

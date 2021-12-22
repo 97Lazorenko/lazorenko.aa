@@ -8,7 +8,7 @@ DECLARE
     v_region_id number :=1;
     CURSOR c_get_names
     IS
-    select c.name, r.name
+    select c.NAMES, r.name
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
     where v_region_id=region_id or v_region_id is null;
     type record1 is record (cname varchar2(100), rname varchar2(100));
@@ -237,7 +237,7 @@ DECLARE
 p_region_id in number
     )
     IS
-    select c.name, r.name
+    select c.NAMES, r.name
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
     where p_region_id=region_id or p_region_id is null;
     type record1 is record (cname varchar2(100), rname varchar2(100));
@@ -508,7 +508,7 @@ declare
 BEGIN
     DBMS_OUTPUT.PUT_LINE( 'Запрос 1');---------------------\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\------------------ЗАПРОС 1
     open v_cursor_1 for
-select c.name, r.name
+select c.NAMES, r.name
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
     where v_region_id=region_id or v_region_id is null;
     loop
@@ -665,7 +665,7 @@ declare
 v_region_id number :=1;
 begin
     for i in
-        (select c.name as cn, r.name as rn
+        (select c.NAMES as cn, r.name as rn
 from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
     where v_region_id=region_id or v_region_id is null)
     loop

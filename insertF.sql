@@ -5,13 +5,13 @@ values (default, 'Новосибирская область');
 insert into LAZORENKO_AL.region (region_id, name)
 values (default, 'Красноярский край');
 
-insert into LAZORENKO_AL.city (city_id, name, region_id)
+insert into LAZORENKO_AL.city (city_id, NAMES, region_id)
 values (default, 'Кемерово', 1);
-insert into LAZORENKO_AL.city (city_id, name, region_id)
+insert into LAZORENKO_AL.city (city_id, NAMES, region_id)
 values (default, 'Новокузнецк', 1);
-insert into LAZORENKO_AL.city (city_id, name, region_id)
+insert into LAZORENKO_AL.city (city_id, NAMES, region_id)
 values (default, 'Новосибирск', 2);
-insert into LAZORENKO_AL.city (city_id, name, region_id)
+insert into LAZORENKO_AL.city (city_id, NAMES, region_id)
 values (default, 'Красноярск', 3);
 
 insert into LAZORENKO_AL.med_org (med_org_id, name, city_id)

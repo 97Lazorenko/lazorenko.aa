@@ -54,7 +54,9 @@ as
         v_result
     );
 
-    if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'||utl_call_stack.subprogram(1)(2)); end if;
+    if is_debug then dbms_output.put_line($$plsql_unit_owner||'.'||$$plsql_unit||'.'
+                                              ||utl_call_stack.subprogram(1)(2));
+    end if;
 
     v_json.put('code', v_result);
 

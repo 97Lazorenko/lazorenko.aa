@@ -15,61 +15,76 @@ create table LAZORENKO_AL.doctors_from_another_sys (doctor_fas_id number generat
 
 --процедура для merge
 
- create or replace procedure lazorenko_al.merge_doctors(
-v_item in lazorenko_al.t_doctor
+create or replace procedure lazorenko_al.merge_and_insert_doctors(
+v_out_result out number
 )
 as
-    begin
-        merge into lazorenko_al.doctors_from_another_sys a
-        using (
-        select 1 as id_doctor, 2 as id_hospital, 3 as Lname, 4 as fname, 5 as mname from dual
-        ) b
-        on (
-        a.id_doctor = b.id_doctor
-        )
+    v_arr_doctor lazorenko_al.t_arr_doctor := lazorenko_al.t_arr_doctor();
+begin
+    v_arr_doctor := lazorenko_al.service_for_doctors(v_out_result);
+
+  merge into lazorenko_al.doctor origin
+    using (
+        select doctor_id, hospital_id, name, fname, petronymic from table(v_arr_doctor)
+    ) new
+    on (
+        origin.external_id = new.doctor_id
+    )
+    when matched then
+        update set
+           origin.name = new.name,
+           origin.fname = new.fname,
+           origin.petronymic = new.petronymic,
+           origin.hospital_id = new.hospital_id
     when not matched then
-        insert (id_doctor, id_hospital, lname, fname, mname)
-        values (v_item.doctor_id, v_item.hospital_id, v_item.name, v_item.fname, v_item.petronymic)
-    when matched then update set a.id_hospital=b.id_hospital;
-    end;
-
---итоговая процедура
-
-create or replace procedure lazorenko_al.insert_incomming_doctors
-as
-
-    v_result integer;
-    v_response lazorenko_al.t_arr_doctor := lazorenko_al.t_arr_doctor();
-
-begin
-
-    v_response := lazorenko_al.service_for_doctors(
-        out_result => v_result
-    );
-
-    dbms_output.put_line(v_result);
-
-    if v_response.count>0 then
-    for i in v_response.first..v_response.last
-    loop
-        declare
-            v_item lazorenko_al.t_doctor := v_response(i);
-        begin
-               lazorenko_al.merge_doctors(v_item);
-        end;
-    end loop;
-    end if;
-
-    --dbms_output.put_line(v_response.COUNT);
-end;
-
-
-begin
-    lazorenko_al.insert_incomming_doctors();
+        insert (doctor_id, name, hospital_id, zone_id, hiring_date, dismiss_date, fname, petronymic, external_id)
+        values (default, new.name, 4, 2, trunc(sysdate), null, new.fname, new.petronymic, new.doctor_id);
     commit;
+
+    dbms_output.PUT_LINE(v_arr_doctor.count);
+
+end;
+
+declare
+    v_out_result number;
+begin
+    LAZORENKO_AL.merge_and_insert_doctors(v_out_result);
 end;
 
 
+
+
+
+--просмотр списка задач вида SCHEDULE
+select * from user_scheduler_jobs;
+
+--просмотр логов
+select * from user_scheduler_job_log;
+
+
+
+--запуск задачи
+begin
+    sys.dbms_scheduler.enable(
+        name      => 'lazorenko_al.job_cache_doctor1'
+    );
+end;
+/
+
+
+
+--остановка задачи
+begin
+    sys.dbms_scheduler.disable(
+        name      => 'student.job_test'
+    );
+end;
+
+begin
+    sys.dbms_scheduler.drop_job(
+        job_name      => 'lazorenko_al.job_cache_doctor1'
+    );
+end;
 
 
 --создание задачи
@@ -77,70 +92,76 @@ begin
 
     sys.dbms_scheduler.create_job(
 
-        job_name        => 'lazorenko_al.job_cache_doctor',
-        start_date      => to_timestamp_tz('2021/12/08 17:40:00.000000 +07:00','yyyy/mm/dd hh24:mi:ss.ff tzh:tzm'),
+        job_name        => 'lazorenko_al.job_cache_doctor1',
+        start_date      => to_timestamp_tz('2021/12/20 17:40:00.000000 +07:00','yyyy/mm/dd hh24:mi:ss.ff tzh:tzm'),
         repeat_interval => 'FREQ=HOURLY;INTERVAL=1;',
         end_date        => null,
         job_class       => 'DEFAULT_JOB_CLASS',
         job_type        => 'PLSQL_BLOCK',
-        job_action      => 'begin lazorenko_al.insert_incomming_doctors(); end;',
+
+        job_action      => 'declare
+                                v_out_result number;
+                            begin
+                                lazorenko_al.merge_and_insert_doctors(v_out_result);
+                            end;',
+
         comments        => 'Кэширование'
 
     );
 
     sys.dbms_scheduler.set_attribute(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'RESTARTABLE',
         value     => false
     );
 
     sys.dbms_scheduler.set_attribute(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'RESTART_ON_RECOVERY',
         value     => false
     );
 
     sys.dbms_scheduler.set_attribute(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'RESTART_ON_FAILURE',
         value     => false
     );
 
     sys.dbms_scheduler.set_attribute_null(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'MAX_FAILURES'
     );
 
     sys.dbms_scheduler.set_attribute_null(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'MAX_RUNS'
     );
 
     sys.dbms_scheduler.set_attribute(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'LOGGING_LEVEL',
         value     => sys.dbms_scheduler.logging_full
     );
 
     sys.dbms_scheduler.set_attribute(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'JOB_PRIORITY',
         value     => 3
     );
 
     sys.dbms_scheduler.set_attribute_null(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'SCHEDULE_LIMIT'
     );
 
     sys.dbms_scheduler.set_attribute(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'AUTO_DROP',
         value     => false
     );
 
     sys.dbms_scheduler.set_attribute(
-        name      => 'lazorenko_al.job_cache_doctor',
+        name      => 'lazorenko_al.job_cache_doctor1',
         attribute => 'STORE_OUTPUT',
         value     => true
     );

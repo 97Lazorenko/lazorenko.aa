@@ -10,7 +10,7 @@ as
     v_cursor_1 sys_refcursor;
 begin
 open v_cursor_1 for
-    select c.name, r.name
+    select c.NAMES, r.name
     from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
     where p_region_id=region_id or p_region_id is null;
 
@@ -38,7 +38,7 @@ create or replace procedure lazorenko_al.get_get_cities_regions(
 as
 begin
     open out_cursor for
-    select c.name, r.name
+    select c.NAMES, r.name
     from lazorenko_al.city c inner join lazorenko_al.region r USING(region_id)
     where p_region_id=region_id or p_region_id is null;
 end;

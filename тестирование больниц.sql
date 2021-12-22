@@ -150,7 +150,7 @@ end;
     mock_id_hospital :=50;
     mock_hname :='test';
     mock_id_availability :=1;
-    mock_id_doctor :=50;
+    mock_id_doctor :=2;
     mock_id_med_org :=1;
     mock_id_ownership_type :=1;
     mock_enter_into_the_sys :=sysdate - 1000;
