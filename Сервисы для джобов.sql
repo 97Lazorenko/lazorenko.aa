@@ -1,6 +1,3 @@
-/*
- PARSING
- */
 
 create or replace type lazorenko_al.t_doctor as object(
     doctor_id number,

@@ -63,7 +63,7 @@ v_clob clob;
 begin
 
     v_clob := lazorenko_al.json_record(
-    330, 1, true, 3, 3, 4);
+    33, 1, true, 3, 3, 4);
 
     dbms_output.put_line(v_clob);
 
